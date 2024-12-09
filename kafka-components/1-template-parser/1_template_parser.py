@@ -12,6 +12,13 @@ import string
 import random
 import os
 
+# command
+
+# TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC=test 
+# TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC=validated_templates
+# TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC=log-orchestrator-logs
+# TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS=192.168.21.96:9092
+
 # Kafka parameteres
 input_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC')
 val_templ_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC')
@@ -57,7 +64,7 @@ def write_log(str_ts, uuid, status, msg):
     log['status'] = status
     write_log_to_kafka(log)
 
-def get_validated_templated():
+def get_validated_templates():
     group_id = ''.join(random.choices(string.ascii_uppercase +
                                       string.ascii_lowercase +
                                       string.digits, k=64))
@@ -181,29 +188,13 @@ def get_param(param_obj, user_parameter, use_constraints=False):
                 msg = f"{user_parameter=}({type(user_parameter)=}) not in {valid_values=}({type(valid_values[0])=})"
                 return None, False, msg
         else:
-            # If here, the user parameter is provided and the check on constraints must be done
-            # but no "valid_values" list has been imported. To report.
-            msg = f"No contraint collected {param_obj=}"
-            return None, False, msg
+            # If here, the user parameter is provided and the check on constraints enabled but no
+            # "valid_values" list has been imported. Checks allowed only with 'valid_values'. 
+            # Nothing to do.
+            return user_parameter, True, ""
     else:
         # No constrain 
         return user_parameter, True, ""
-
-def val_input_parameter(template, depl_data):
-    validated_template = get_basic_info_template(template, depl_data)
-    for param_key, param_obj in template['topology_template']['inputs'].items():
-        user_param = depl_data['user_parameters'].get(param_key, None)
-        to_constraint = USE_CONSTRAINTS and 'constraints' in param_obj and param_key not in ['num_cpus','mem_size']
-        param, param_is_valid, err_msg = get_param(param_obj, user_param, to_constraint)
-        if param_is_valid:
-            validated_template['topology_template']['inputs'][param_key] = param
-        else:
-            # Forward message error outside
-            msg = f"Error during the validation of {param_key} parameter. Message: {err_msg}"
-            is_valid = True
-            template = {}
-            return template, is_valid, msg
-    return 
 
 # Merge user parameters and template defualt and requirements
 def get_validated_template(template, depl_data):
@@ -218,8 +209,8 @@ def get_validated_template(template, depl_data):
             validated_template['topology_template']['inputs'][param_key] = param
         else:
             # Forward message error outside
-            msg = f"Error during the validation of {param_key} parameter. Message: {err_msg}"
-            is_valid = True
+            msg = f"Error during the validation of '{param_key}': {err_msg}"
+            is_valid = False
             template = {}
             return template, is_valid, msg
 
@@ -246,7 +237,7 @@ def pprint(j):
 
 
 # Collect already written validated templates
-validated_template_written = get_validated_templated()
+validated_template_written = get_validated_templates()
 
 # Init and start Kafka consumer
 group_id = ''.join(random.choices(string.ascii_uppercase +
