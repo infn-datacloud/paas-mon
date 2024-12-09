@@ -12,17 +12,11 @@ import string
 import random
 import os
 
-# command
-
-TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC=test 
-TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC=validated_templates
-TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC=log-orchestrator-logs
-TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS=192.168.21.96:9092
 # Kafka parameteres
-input_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC',"test")
-val_templ_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC',"validated_templates")
-log_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC',"log-orchestrator-logs")
-bootstrap_servers = os.environ.get('TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS',"192.168.21.96:9092").split(',')
+input_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC')
+val_templ_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC')
+log_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC')
+bootstrap_servers = os.environ.get('TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS').split(',')
 base_group_id_name = "log-orchestrator-group"
 
 # App parameters
