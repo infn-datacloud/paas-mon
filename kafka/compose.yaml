@@ -50,3 +50,15 @@ services:
       - ./notebooks:/home/jovyan/work
     ports:
       - '8888:8888'
+      
+  template-parser:
+    container_name: mon-template-parser
+    image: paas-python:1
+    volumes:
+      - ../kafka-components/1-template-parser/:/app
+    environment:
+      TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC: test
+      TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC: validated_templates 
+      TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC: log-orchestrator-logs 
+      TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092 
+    command: python3 /app/1_template_parser.py
