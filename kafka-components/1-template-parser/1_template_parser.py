@@ -114,24 +114,20 @@ def extract_user_parameters(str_json: str) -> dict:
 
 # Collect dep_name, uuid and user_group from template and deploment parameters:
 def get_basic_info_template(template, depl_data):
-    validated_template = template.copy()
-    validated_template['dep_name'] = None 
+    template['dep_name'] = None 
     if 'metadata' in template and 'display_name' in template['metadata']:
-        validated_template['dep_name'] = template['metadata']['display_name']
+        template['dep_name'] = template['metadata']['display_name']
     elif 'description' in template:
         if "kubernetes" in str(template['description']).lower():
-            validated_template['dep_name'] = "Cluster Kubernetes"
+            template['dep_name'] = "Cluster Kubernetes"
         else:
-            validated_template['dep_name'] = template['description']
-    validated_template['user_group'] = depl_data['user_group'] if 'user_group' in depl_data else None
-    validated_template['uuid'] = depl_data['uuid'] if 'uuid' in depl_data else None
-    return validated_template
+            template['dep_name'] = template['description']
+    template['user_group'] = depl_data['user_group'] if 'user_group' in depl_data else None
+    template['uuid'] = depl_data['uuid'] if 'uuid' in depl_data else None
+    return template
 
 def cast_param(param, param_type):
-    if param_type:
-        return param_type(param) 
-    else:
-        return param
+    return param_type(param) if param_type else param
 
 # Check constraints, default and value type
 def get_param(param_obj, user_parameter, use_constraints=False):
@@ -144,7 +140,7 @@ def get_param(param_obj, user_parameter, use_constraints=False):
 
         # If default parameter is provided use that
         if 'default' in param_obj:
-            return cast_param(param_obj['default'],param_type), True, ""
+            return cast_param(param_obj['default'],param_type), ""
         
         # If here, no user or default parameters are provided
         # So an error will be thrown
@@ -153,16 +149,16 @@ def get_param(param_obj, user_parameter, use_constraints=False):
                 if isinstance(param_obj['required'], bool):
                     if param_obj['required'] == True:
                         msg = "Parameter required and not default and user parameter provided"
-                        return None, False, msg
+                        return None, msg
                     else:
                         msg = "Parameter not required and not default and user parameter provided"
-                        return None, False, msg
+                        return None, msg
                 else:
                     msg = f"Required parameter not boolean: ({type(param_obj['required'])}){param_obj['required']=}"
-                    return None, False, msg
+                    return None, msg
             else:
                 msg = "'required' field, default and user parameter provided "
-                return None, False, msg
+                return None, msg
 
     # If here, user provided a parameter
 
@@ -182,54 +178,54 @@ def get_param(param_obj, user_parameter, use_constraints=False):
         if valid_values:
             if user_parameter in valid_values:
                 # If the user parameter belongs to "valid_values" list, returns it
-                return user_parameter, True, ""
+                return user_parameter, ""
             else:
                 # If not, report
                 msg = f"{user_parameter=}({type(user_parameter)=}) not in {valid_values=}({type(valid_values[0])=})"
-                return None, False, msg
+                return None, msg
         else:
             # If here, the user parameter is provided and the check on constraints enabled but no
             # "valid_values" list has been imported. Checks allowed only with 'valid_values'. 
             # Nothing to do.
-            return user_parameter, True, ""
+            return user_parameter, ""
     else:
         # No constrain 
-        return user_parameter, True, ""
+        return user_parameter, ""
 
 # Merge user parameters and template defualt and requirements
 def get_validated_template(template, depl_data):
-    validated_template = get_basic_info_template(template, depl_data)
-    
-    # Validate and merge parameters  (user and default parameters, constraints and required)
+    template = get_basic_info_template(template, depl_data)
+    # Validate and merge parameters (user and default parameters, constraints and required)
     for param_key, param_obj in template['topology_template']['inputs'].items():
         user_param = depl_data['user_parameters'].get(param_key, None)
         to_constraint = USE_CONSTRAINTS and 'constraints' in param_obj and param_key not in ['num_cpus','mem_size']
         param, param_is_valid, err_msg = get_param(param_obj, user_param, to_constraint)
         if param_is_valid:
-            validated_template['topology_template']['inputs'][param_key] = param
+            template['topology_template']['inputs'][param_key] = param
         else:
             # Forward message error outside
-            msg = f"Error during the validation of '{param_key}': {err_msg}"
-            is_valid = False
+            msg = f"Error during the validation of {param_key} parameter. Message: {err_msg}"
             template = {}
-            return template, is_valid, msg
+            return template, msg
 
-    # Replace values in node_templates
-    for node_key, node_data in template['topology_template']['node_templates'].items():
-        if 'properties' in node_data:
-            for input_key, input_data in node_data['properties'].items():
-                if isinstance(input_data, dict) and 'get_input' in input_data:
-                    value = validated_template['topology_template']['inputs'][input_data['get_input']]
-                    validated_template['topology_template']['node_templates'][node_key]['properties'][input_key] = value
-        if 'capabilities' in node_data:
-            for obj_key, obj_data in node_data['capabilities'].items():
-                for input_key, input_data in obj_data['properties'].items():
-                    if isinstance(input_data, dict) and 'get_input' in input_data:
-                        value = validated_template['topology_template']['inputs'][input_data['get_input']]
-                        validated_template['topology_template']['node_templates'][node_key]['capabilities'][obj_key]['properties'][input_key] = value
-    is_valid = True
+    def find_get_input(var):
+        if isinstance(var, dict):
+            for k,v in var.items():
+                if isinstance(v,dict) and "get_input" in v:
+                    input_var = v['get_input']
+                    input_value = template['topology_template']['inputs'][input_var]
+                    var[k] = input_value
+                else:
+                    find_get_input(v)
+        if isinstance(var,list):
+            for el in var:
+                find_get_input(el)
+        
+    for _, node_data in template['topology_template']['node_templates'].items():
+        find_get_input(node_data)
+
     err_msg = ""
-    return validated_template, is_valid, err_msg
+    return template, err_msg
 
 # Utilities
 def pprint(j):
