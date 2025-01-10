@@ -93,9 +93,9 @@ def extract_timestamp(line):
 # Validate YAML
 def import_template(str_template):
     try:
-        return (True, yaml.safe_load("\n".join(str_template)))
+        return (yaml.safe_load("\n".join(str_template)), True)
     except Exception:
-        return (False, dict())
+        return (dict(), False)
 
 # Extract parameter type from template 
 def get_param_type(param_obj):
@@ -269,11 +269,11 @@ for message in consumer:
     if event_template_string in line and info_template_string in line:
         str_json = line.split(event_template_string)[1]
         depl_data = extract_user_parameters(str_json)
-        is_template, template = import_template(str_template)  
+        template, is_template = import_template(str_template)  
         template['timestamp'] = log_ts.strftime(app_ts_format)
         if is_template:
-            validated_template, is_valid, err_msg = get_validated_template(template, depl_data)
-            if is_valid:
+            validated_template, err_msg = get_validated_template(template, depl_data)
+            if err_msg:
                 str_val_templ = json.dumps(validated_template, sort_keys=True)
                 if str_val_templ not in validated_template_written:
                     write_val_templ_kakfa(validated_template)
