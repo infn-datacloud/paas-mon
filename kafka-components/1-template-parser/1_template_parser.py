@@ -199,8 +199,8 @@ def get_validated_template(template, depl_data):
     for param_key, param_obj in template['topology_template']['inputs'].items():
         user_param = depl_data['user_parameters'].get(param_key, None)
         to_constraint = USE_CONSTRAINTS and 'constraints' in param_obj and param_key not in ['num_cpus','mem_size']
-        param, param_is_valid, err_msg = get_param(param_obj, user_param, to_constraint)
-        if param_is_valid:
+        param, err_msg = get_param(param_obj, user_param, to_constraint)
+        if err_msg:
             template['topology_template']['inputs'][param_key] = param
         else:
             # Forward message error outside
