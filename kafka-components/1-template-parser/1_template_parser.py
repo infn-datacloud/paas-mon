@@ -276,7 +276,7 @@ for message in consumer:
             validated_template, err_msg = get_validated_template(template, depl_data)
             if not err_msg:
                 str_val_templ = json.dumps(validated_template, sort_keys=True)
-                if not str_val_templ in validated_templates:
+                if str_val_templ not in validated_templates:
                     write_val_templ_kakfa(validated_template)
                     write_log(log_ts, depl_data['uuid'], "ok", "validated")
                 else:
