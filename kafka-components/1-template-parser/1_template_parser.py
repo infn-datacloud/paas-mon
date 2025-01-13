@@ -3,28 +3,30 @@
 # Python dependecies:
 # - kafka-python
 
-
 import json
 from datetime import datetime
 import yaml
 from kafka import KafkaConsumer, KafkaProducer
 import string
 import random
-import os
-
-# command
-
-# TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC=test 
-# TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC=validated_templates
-# TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC=log-orchestrator-logs
-# TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS=192.168.21.96:9092
+import os 
 
 # Kafka parameteres
-input_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC')
-val_templ_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC')
-log_topic = os.environ.get('TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC')
-bootstrap_servers = os.environ.get('TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS').split(',')
-base_group_id_name = "log-orchestrator-group"
+kafka_log_orchestrator_envvar =          'TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC'
+kafka_validated_tamplte_topic_envvar =   'TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC'
+kafka_log_app_topic_envvar =             'TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC'
+kakfa_bootstrap_servers_envvar =         'TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS'
+
+kafka_log_orchestrator_topic_default =   'test'
+kafka_validated_template_topic_default = 'validated-templates'
+kafka_log_app_topic_default =            'logs-parser-templates'
+kafka_bootstrap_servers_default =        "192.168.21.96:9092"
+
+input_topic = os.environ.get(kafka_log_orchestrator_envvar, kafka_log_orchestrator_topic_default)
+val_templ_topic = os.environ.get(kafka_validated_tamplte_topic_envvar, kafka_validated_template_topic_default)
+log_topic = os.environ.get(kafka_log_app_topic_envvar, kafka_log_app_topic_default)
+bootstrap_servers = os.environ.get(kakfa_bootstrap_servers_envvar, kafka_bootstrap_servers_default).split(',')
+base_group_id_name = "template-parser"
 
 # App parameters
 USE_CONSTRAINTS = True
@@ -63,7 +65,7 @@ def write_log(str_ts, uuid, status, msg):
     log['msg'] = msg
     log['status'] = status
     write_log_to_kafka(log)
-
+    
 def get_validated_templates():
     group_id = ''.join(random.choices(string.ascii_uppercase +
                                       string.ascii_lowercase +
@@ -75,7 +77,9 @@ def get_validated_templates():
         auto_offset_reset = 'earliest', 
         enable_auto_commit = True,
         value_deserializer = lambda x: x.decode('utf-8'),
-        consumer_timeout_ms = 500
+        max_partition_fetch_bytes=100_000_000,
+        fetch_max_bytes = 50_000_000,
+        consumer_timeout_ms=1000
     )
 
     return [message.value for message in consumer]
@@ -114,17 +118,18 @@ def extract_user_parameters(str_json: str) -> dict:
 
 # Collect dep_name, uuid and user_group from template and deploment parameters:
 def get_basic_info_template(template, depl_data):
-    template['dep_name'] = None 
+    validated_template = template.copy()
+    validated_template['dep_name'] = None 
     if 'metadata' in template and 'display_name' in template['metadata']:
-        template['dep_name'] = template['metadata']['display_name']
+        validated_template['dep_name'] = template['metadata']['display_name']
     elif 'description' in template:
         if "kubernetes" in str(template['description']).lower():
-            template['dep_name'] = "Cluster Kubernetes"
+            validated_template['dep_name'] = "Cluster Kubernetes"
         else:
-            template['dep_name'] = template['description']
-    template['user_group'] = depl_data['user_group'] if 'user_group' in depl_data else None
-    template['uuid'] = depl_data['uuid'] if 'uuid' in depl_data else None
-    return template
+            validated_template['dep_name'] = template['description']
+    validated_template['user_group'] = depl_data['user_group'] if 'user_group' in depl_data else None
+    validated_template['uuid'] = depl_data['uuid'] if 'uuid' in depl_data else None
+    return validated_template
 
 def cast_param(param, param_type):
     return param_type(param) if param_type else param
@@ -184,14 +189,14 @@ def get_param(param_obj, user_parameter, use_constraints=False):
                 msg = f"{user_parameter=}({type(user_parameter)=}) not in {valid_values=}({type(valid_values[0])=})"
                 return None, msg
         else:
-            # If here, the user parameter is provided and the check on constraints enabled but no
-            # "valid_values" list has been imported. Checks allowed only with 'valid_values'. 
-            # Nothing to do.
-            return user_parameter, ""
+            # If here, the user parameter is provided and the check on constraints must be done
+            # but no "valid_values" list has been imported. To report.
+            msg = f"No contraint collected {param_obj=}"
+            return None, msg
     else:
         # No constrain 
         return user_parameter, ""
-
+        
 # Merge user parameters and template defualt and requirements
 def get_validated_template(template, depl_data):
     template = get_basic_info_template(template, depl_data)
@@ -201,12 +206,12 @@ def get_validated_template(template, depl_data):
         to_constraint = USE_CONSTRAINTS and 'constraints' in param_obj and param_key not in ['num_cpus','mem_size']
         param, err_msg = get_param(param_obj, user_param, to_constraint)
         if err_msg:
-            template['topology_template']['inputs'][param_key] = param
-        else:
             # Forward message error outside
             msg = f"Error during the validation of {param_key} parameter. Message: {err_msg}"
             template = {}
             return template, msg
+        else:
+            template['topology_template']['inputs'][param_key] = param
 
     def find_get_input(var):
         if isinstance(var, dict):
@@ -223,17 +228,13 @@ def get_validated_template(template, depl_data):
         
     for _, node_data in template['topology_template']['node_templates'].items():
         find_get_input(node_data)
-
+                                    
     err_msg = ""
     return template, err_msg
 
-# Utilities
-def pprint(j):
-    print(json.dumps(j,indent=2))
-
 
 # Collect already written validated templates
-validated_template_written = get_validated_templates()
+validated_templates = get_validated_templates()
 
 # Init and start Kafka consumer
 group_id = ''.join(random.choices(string.ascii_uppercase +
@@ -252,7 +253,7 @@ consumer = KafkaConsumer(
 collect_template = False
 str_template = list()
 for message in consumer:
-    if string_filter not in message.value: continue
+    if not string_filter in message.value: continue
     kafka_log = datetime.fromtimestamp(float(message.timestamp)/1000)
     log_ts, ts = extract_timestamp(message.value)
     line = str(message.value).split(app_string_splitter)[1]
@@ -273,9 +274,9 @@ for message in consumer:
         template['timestamp'] = log_ts.strftime(app_ts_format)
         if is_template:
             validated_template, err_msg = get_validated_template(template, depl_data)
-            if err_msg:
+            if not err_msg:
                 str_val_templ = json.dumps(validated_template, sort_keys=True)
-                if str_val_templ not in validated_template_written:
+                if not str_val_templ in validated_templates:
                     write_val_templ_kakfa(validated_template)
                     write_log(log_ts, depl_data['uuid'], "ok", "validated")
                 else:
