@@ -116,17 +116,17 @@ def extract_user_parameters(str_json: str) -> dict:
     data = json.loads(str_json)
     return data
 
-# Collect dep_name, uuid and user_group from template and deploment parameters:
+# Collect template_name, uuid and user_group from template and deploment parameters:
 def get_basic_info_template(template, depl_data):
     validated_template = template.copy()
-    validated_template['dep_name'] = None 
+    validated_template['template_name'] = None 
     if 'metadata' in template and 'display_name' in template['metadata']:
-        validated_template['dep_name'] = template['metadata']['display_name']
+        validated_template['template_name'] = template['metadata']['display_name']
     elif 'description' in template:
         if "kubernetes" in str(template['description']).lower():
-            validated_template['dep_name'] = "Cluster Kubernetes"
+            validated_template['template_name'] = "Cluster Kubernetes"
         else:
-            validated_template['dep_name'] = template['description']
+            validated_template['template_name'] = template['description']
     validated_template['user_group'] = depl_data['user_group'] if 'user_group' in depl_data else None
     validated_template['uuid'] = depl_data['uuid'] if 'uuid' in depl_data else None
     return validated_template
