@@ -1,32 +1,6 @@
-# /bin/env python3
-
-# Python dependecies:
-# - kafka-python
-
-import json
-from datetime import datetime
 import yaml
-from kafka import KafkaConsumer, KafkaProducer
-import string
-import random
-import os 
-
-# Kafka parameteres
-kafka_log_orchestrator_envvar =          'TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC'
-kafka_validated_tamplte_topic_envvar =   'TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC'
-kafka_log_app_topic_envvar =             'TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC'
-kakfa_bootstrap_servers_envvar =         'TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS'
-
-kafka_log_orchestrator_topic_default =   'test'
-kafka_validated_template_topic_default = 'validated-templates'
-kafka_log_app_topic_default =            'logs-parser-templates'
-kafka_bootstrap_servers_default =        "192.168.21.96:9092"
-
-input_topic = os.environ.get(kafka_log_orchestrator_envvar, kafka_log_orchestrator_topic_default)
-val_templ_topic = os.environ.get(kafka_validated_tamplte_topic_envvar, kafka_validated_template_topic_default)
-log_topic = os.environ.get(kafka_log_app_topic_envvar, kafka_log_app_topic_default)
-bootstrap_servers = os.environ.get(kakfa_bootstrap_servers_envvar, kafka_bootstrap_servers_default).split(',')
-base_group_id_name = "template-parser"
+from datetime import datetime
+import json
 
 # App parameters
 USE_CONSTRAINTS = True
@@ -37,52 +11,6 @@ info_template_string = "{\"uuid\""
 syslog_ts_format = "%Y-%m-%dT%H:%M:%S%z"  # YYYY-MM-DD HH:MM:SS+ZZ:ZZ
 app_ts_format = "%Y-%m-%d %H:%M:%S.%f"  # YYYY-MM-DD HH:MM:SS
 string_filter = "orchestrator orchestrator"
-
-# Write message in kafka topic
-def write_msg_to_kafka(data, topic):
-    producer = KafkaProducer(bootstrap_servers=bootstrap_servers,
-                             value_serializer=lambda x: json.dumps(x, sort_keys=True).encode('utf-8'))
-    if isinstance(data, list):
-        for msg in data:
-            producer.send(topic, msg)
-    else:
-        producer.send(topic, data)
-    producer.flush()
-    producer.close()
-
-# write log in kafka
-def write_log_to_kafka(data):
-    write_msg_to_kafka(data, log_topic)
-
-# write validated template in kafka
-def write_val_templ_kakfa(data):
-    write_msg_to_kafka(data, val_templ_topic)
-
-def write_log(str_ts, uuid, status, msg):
-    log = dict()
-    log['timestamp'] = str_ts.strftime(app_ts_format)
-    log['uuid'] = uuid
-    log['msg'] = msg
-    log['status'] = status
-    write_log_to_kafka(log)
-    
-def get_validated_templates():
-    group_id = ''.join(random.choices(string.ascii_uppercase +
-                                      string.ascii_lowercase +
-                                      string.digits, k=64))
-    consumer = KafkaConsumer(
-        val_templ_topic,
-        bootstrap_servers = bootstrap_servers,
-        group_id = f'{base_group_id_name}-{group_id}',
-        auto_offset_reset = 'earliest', 
-        enable_auto_commit = True,
-        value_deserializer = lambda x: x.decode('utf-8'),
-        max_partition_fetch_bytes=100_000_000,
-        fetch_max_bytes = 50_000_000,
-        consumer_timeout_ms=1000
-    )
-
-    return [message.value for message in consumer]
 
 # Parse timestamp
 def extract_timestamp(line):
@@ -152,7 +80,7 @@ def get_param(param_obj, user_parameter, use_constraints=False):
         else:
             if 'required' in param_obj:
                 if isinstance(param_obj['required'], bool):
-                    if param_obj['required'] == True:
+                    if param_obj['required']:
                         msg = "Parameter required and not default and user parameter provided"
                         return None, msg
                     else:
@@ -231,56 +159,3 @@ def get_validated_template(template, depl_data):
                                     
     err_msg = ""
     return template, err_msg
-
-
-# Collect already written validated templates
-validated_templates = get_validated_templates()
-
-# Init and start Kafka consumer
-group_id = ''.join(random.choices(string.ascii_uppercase +
-                                  string.ascii_lowercase +
-                                  string.digits, k=64))
-consumer = KafkaConsumer(
-    input_topic,
-    bootstrap_servers = bootstrap_servers,
-    group_id = f'{base_group_id_name}-{group_id}',
-    auto_offset_reset = 'earliest', 
-    enable_auto_commit = True,
-    value_deserializer = lambda x: x.decode('utf-8'),
-#    consumer_timeout_ms = 500
-)
-
-collect_template = False
-str_template = list()
-for message in consumer:
-    if not string_filter in message.value: continue
-    kafka_log = datetime.fromtimestamp(float(message.timestamp)/1000)
-    log_ts, ts = extract_timestamp(message.value)
-    line = str(message.value).split(app_string_splitter)[1]
-    if ts and start_template_string in line:
-        collect_template = True
-        continue
-    
-    if ts and collect_template:
-        collect_template = False
-
-    if not ts and collect_template:
-        str_template.append(line) 
-    
-    if event_template_string in line and info_template_string in line:
-        str_json = line.split(event_template_string)[1]
-        depl_data = extract_user_parameters(str_json)
-        template, is_template = import_template(str_template)  
-        template['timestamp'] = log_ts.strftime(app_ts_format)
-        if is_template:
-            validated_template, err_msg = get_validated_template(template, depl_data)
-            if not err_msg:
-                str_val_templ = json.dumps(validated_template, sort_keys=True)
-                if str_val_templ not in validated_templates:
-                    write_val_templ_kakfa(validated_template)
-                    write_log(log_ts, depl_data['uuid'], "ok", "validated")
-                else:
-                    write_log(log_ts, depl_data['uuid'], "ok", "validated and template already present")
-            else:
-                write_log(log_ts, depl_data['uuid'], "nok", err_msg)
-        str_template = list()
