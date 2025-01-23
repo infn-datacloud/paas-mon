@@ -7,7 +7,7 @@ import os
 from modules import kafka_module
 from modules import infer_processor
 from time import time
-
+ 
 # Kafka parameteres
 KAFKA_VAL_TEMPL_TOPIC =   'INFER_PROC_KAFKA_VAL_TEMPL_TOPIC'
 KAFKA_RALLY_TOPIC =       'INFER_PROC_KAFKA_RALLY_TOPIC'

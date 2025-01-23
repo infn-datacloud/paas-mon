@@ -9,7 +9,7 @@ from time import time
 import json
 from datetime import datetime
 import os 
-
+ 
 # Kafka parameteres
 KAFKA_LOG_ORCHESTRATOR_TOPIC = 'TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC'
 KAFKA_VAL_TEMPL_TOPIC =        'TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC'
