@@ -1,6 +1,6 @@
 import pandas as pd # type: ignore
 import sys
-from infer_processor_conf import *
+from modules.infer_processor_conf import *
 from datetime import datetime, timedelta
 
 prov_data = dict()

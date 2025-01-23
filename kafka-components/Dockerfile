@@ -1,7 +1,10 @@
-from python:3.10
+FROM python:3.10
 
-RUN python3 -m pip install pyyaml kafka-python
+RUN python3 -m pip install \
+    kafka-python \
+    pandas \
+    pyyaml 
 
-COPY code /kafka-components
+COPY ./src /kafka-components/
 
 WORKDIR /kafka-components
