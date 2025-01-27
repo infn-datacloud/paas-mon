@@ -1,7 +1,7 @@
 ---
 services:
   template-parser:
-    container_name: mon-template-parser
+    container_name: template-parser
     image: paas-python:1
     command: python3 /kafka-components/template-parser.py
     environment:
