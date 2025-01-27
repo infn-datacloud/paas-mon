@@ -3,12 +3,21 @@ services:
   template-parser:
     container_name: mon-template-parser
     image: paas-python:1
-    volumes:
-      - ./1-template-parser:/app
+    command: python3 /kafka-components/template-parser.py
     environment:
       TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC: test
       TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC: validated-templates
       TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC: logs-parser-templates
       TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
-    command: python3 /app/1-template-parser.py
-
+    
+  infer-preprocessor:
+    container_name: infer-preprocessor
+    image: paas-python:1
+    command: python3 /kafka-components/inference-processor.py
+    environment:
+      INFER_PROC_KAFKA_VAL_TEMPL_TOPIC: validated-templates
+      INFER_PROC_KAFKA_RALLY_TOPIC: rally
+      INFER_PROC_KAFKA_FEEDER_TOPIC: federation-registry-feeder
+      INFER_PROC_KAFKA_INFER_TOPIC: ai-ranker-inference
+      INFER_PROC_KAFKA_LOG_TOPIC: logs-inference-processor
+      INFER_PROC_KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
