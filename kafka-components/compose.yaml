@@ -11,7 +11,7 @@ services:
       TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
     
   infer-preprocessor:
-    container_name: infer-preprocessor
+    container_name: infer-preprocessor 
     image: paas-python:1
     command: python3 /kafka-components/inference-processor.py
     environment:
