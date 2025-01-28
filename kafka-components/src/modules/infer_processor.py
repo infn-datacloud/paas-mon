@@ -242,6 +242,7 @@ def get_msg(dep_data):
         p_info[O_PROVIDER_NAME_KEY] = provider[DD_PROVIDER_NAME_KEY]
         p_info[O_REGION_NAME_KEY] = provider[DD_REGION_NAME_KEY]
         p_info[O_IMAGES_KEY] = provider[DD_IMAGES_KEY]
+        p_info[O_TEST_FAILURE_PERC] = provider[DD_RALLY_VALUE_KEY]
         p_info.update(provider[DD_QUOTAS_KEY])
         p_info.update(dep_data[DD_AGGREGATED_STORAGE_KEY])
         for k,v in p_info.items():

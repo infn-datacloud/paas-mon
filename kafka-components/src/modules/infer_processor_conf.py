@@ -153,7 +153,7 @@ O_PROVIDERS_KEY = 'providers'
 O_PROVIDER_NAME_KEY = 'provider_name'
 O_REGION_NAME_KEY = 'region_name'
 O_IMAGES_KEY = 'images'
-
+O_TEST_FAILURE_PERC = 'test_failure_perc'
 
 # MISCELLANEOUS
 M_QUOTAS_KEYS = {
