@@ -154,6 +154,8 @@ O_PROVIDER_NAME_KEY = 'provider_name'
 O_REGION_NAME_KEY = 'region_name'
 O_IMAGES_KEY = 'images'
 O_TEST_FAILURE_PERC = 'test_failure_perc'
+O_MSG_VERSION = 'msg_version'
+O_MSG_VERSION_VALUE = '1.0.0'
 
 # MISCELLANEOUS
 M_QUOTAS_KEYS = {

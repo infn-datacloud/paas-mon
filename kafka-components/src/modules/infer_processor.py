@@ -235,6 +235,7 @@ def compute_aggregated_resource(data):
 
 def get_msg(dep_data):
     m = {k:dep_data[k] for k in DD_KEYS_TO_IMPORT} 
+	m[O_MSG_VERSION] = O_MSG_VERSION_VALUE
     m[O_PROVIDERS_KEY] = list()
     for provider in dep_data[DD_PROVIDERS_KEY].values():
         p_info = provider[DD_AGGREGATED_RESOURCES_KEY]

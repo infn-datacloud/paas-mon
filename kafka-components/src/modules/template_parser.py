@@ -47,6 +47,7 @@ def extract_user_parameters(str_json: str) -> dict:
 # Collect template_name, uuid and user_group from template and deploment parameters:
 def get_basic_info_template(template, depl_data):
     validated_template = template.copy()
+    validated_template['msg_version'] = "1.0.0" 
     validated_template['template_name'] = None 
     if 'metadata' in template and 'display_name' in template['metadata']:
         validated_template['template_name'] = template['metadata']['display_name']
