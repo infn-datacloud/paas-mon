@@ -34,14 +34,13 @@ interval_s = round(time()-start_time,2)
 km.write_log(msg=f"Total {tot_msg_num} messages imported in {interval_s} s", status="INIT")
 km.write_log(msg=f"Imported {len(validated_templates)} validated template(s)", status="INIT")
 
-consumer = km.get_consumer_obj(input_topic, decode_json=False)
+consumer = km.get_consumer_obj(input_topic, deser_format='str')
 collect_template = False
 str_template = list()
 for message in consumer:
     if olp.is_line_to_reject(message): 
        continue
 
-    print(message)
     log_ts, ts = olp.extract_timestamp(message)
     line = olp.extract_info(message)
 
