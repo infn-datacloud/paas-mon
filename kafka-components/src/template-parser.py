@@ -31,7 +31,7 @@ interval_s = round(time()-start_time,2)
 km.write_log(msg=f"{tot_msg_num} messages imported in {interval_s} s", status="INIT")
 km.write_log(msg=f"Imported {len(validated_templates)} validated template(s)", status="INIT")
 
-consumer = km.get_consumer_obj(input_topic, False)
+consumer = km.get_consumer_obj(input_topic, decode_json=False)
 collect_template = False
 str_template = list()
 for message in consumer:
