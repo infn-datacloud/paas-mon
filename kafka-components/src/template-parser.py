@@ -22,6 +22,8 @@ km.set_bootstrap_servers(bootstrap_servers)
 km.set_output_topic(val_templ_topic)
 km.set_log_topic(log_topic)
 
+km.write_log(msg=f"Validated topic: {val_templ_topic}", status="INIT")
+
 # Import historical messages from topics
 start_time = time()
 collected_msgs = km.collect_all_msgs_from_topics(val_templ_topic)
