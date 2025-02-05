@@ -3,7 +3,7 @@ services:
   template-parser:
     container_name: template-parser
     image: paas-python:1
-    command: /kafka-components/template-parser.py
+    command: python3 /kafka-components/template-parser.py
     environment:
       TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC: orchestrator-logs
       TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC: validated-templates
@@ -13,7 +13,7 @@ services:
   infer-preprocessor:
     container_name: infer-preprocessor 
     image: paas-python:1
-    command: /kafka-components/inference-processor.py
+    command: python3 /kafka-components/inference-processor.py
     environment:
       INFER_PROC_KAFKA_VAL_TEMPL_TOPIC: validated-templates
       INFER_PROC_KAFKA_RALLY_TOPIC: rally
