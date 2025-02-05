@@ -5,7 +5,7 @@ services:
     image: paas-python:1
     command: /kafka-components/template-parser.py
     environment:
-      TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC: test
+      TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC: orchestrator-logs
       TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC: validated-templates
       TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC: logs-parser-templates
       TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
