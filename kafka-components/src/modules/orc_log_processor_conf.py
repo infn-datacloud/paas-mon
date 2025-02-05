@@ -7,7 +7,7 @@ ORC_LOG_START_TEMPLATE_STRING = "Creating deployment with template"
 ORC_LOG_INFO_TEMPLATE_STRING = "{\"uuid\"" 
 SYSLOG_TS_FORMAT = "%Y-%m-%dT%H:%M:%S%z"  # YYYY-MM-DD HH:MM:SS+ZZ:ZZ
 ORC_TS_FORMAT = "%Y-%m-%d %H:%M:%S.%f"  # YYYY-MM-DD HH:MM:SS
-ORC_LOG_FILTER = "orchestrator orchestrator"
+ORC_LOG_FILTER = "orchestrator orchestrator/"
 
 INPUT_USER_PARAMS = 'user_parameters'
 
@@ -25,6 +25,8 @@ PARAM_VALID_VALUES = 'valid_values'
 PARAM_N_CPUS = 'num_cpus'
 PARAM_MEM = 'mem_size'
 PARAM_PORTS = 'ports'
+PARAM_SERVICE_PORTS = 'service_ports'
+#PARAM_TO_NOT_CHECK = [PARAM_N_CPUS,PARAM_MEM,PARAM_PORTS,PARAM_SERVICE_PORTS]
 PARAM_TO_NOT_CHECK = [PARAM_N_CPUS,PARAM_MEM,PARAM_PORTS]
 
 OUTPUT_LOG_TEMPL_VALID_AND_SENT = "template validated and sent"

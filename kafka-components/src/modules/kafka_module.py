@@ -120,8 +120,7 @@ def get_consumer_obj(*topics, decode_json=True):
         group_id = f'{group_base}-{group_id}',
         auto_offset_reset = 'earliest', 
         enable_auto_commit = True,
-        value_deserializer = derserializer(decode_json),
-        consumer_timeout_ms = 500
+        value_deserializer = derserializer(decode_json)
     )
 
     return consumer

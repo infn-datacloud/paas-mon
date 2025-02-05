@@ -9,11 +9,9 @@ def get_uuid(templ):
 def is_start_to_collect(ts, line):
     return ts and olc.ORC_LOG_START_TEMPLATE_STRING in line
 
-def extract_info(line):
-    return str(line).split(olc.ORC_LOG_SEP)[1]
-
 def is_line_to_reject(line):
-    return olc.ORC_LOG_FILTER not in line or olc.ORC_LOG_SEP not in line
+    return olc.ORC_LOG_FILTER not in line
+    #return olc.ORC_LOG_FILTER not in line or olc.ORC_LOG_SEP not in line
 
 def is_template_meta_data(line):
     return olc.ORC_LOG_EVENT_TEMPLATE_SEP in line and olc.ORC_LOG_INFO_TEMPLATE_STRING in line
@@ -21,6 +19,17 @@ def is_template_meta_data(line):
 def add_timestamp(template, ts):
     template[olc.TEMPL_TIMESTAMP] = ts.strftime(olc.ORC_TS_FORMAT)
     return template
+
+def extract_info(line):
+    syslog_ts =  datetime.strptime(line.split()[0], olc.SYSLOG_TS_FORMAT)
+    pre_line = " ".join(line.split()[:3]) + " "
+    line = line.split(pre_line)[1]
+    try:
+        orc_ts_str = " ".join(line.split()[0:2])
+        orc_ts = datetime.strptime(orc_ts_str, olc.ORC_TS_FORMAT)
+    except (ValueError, IndexError):
+        orc_ts = None
+    return syslog_ts, orc_ts, line
 
 # Parse timestamp
 def extract_timestamp(line):
@@ -31,6 +40,10 @@ def extract_timestamp(line):
     except (ValueError, IndexError):
         orc_ts = None
     return syslog_ts, orc_ts
+
+def extract_info2(line):
+    return str(line).split(olc.ORC_LOG_SEP)[1]
+
 
 # Validate YAML
 def import_template(str_template):
@@ -92,7 +105,7 @@ def get_param(param_obj, user_parameter, use_constraints=False):
     
     # Extract parameter type from template
     param_type = get_param_type(param_obj)
-
+    
     # If use did not inserted the parameter
     if not user_parameter:
 
@@ -105,14 +118,15 @@ def get_param(param_obj, user_parameter, use_constraints=False):
             return None, olc.MSG_PARAM_ERROR2 
         else:
             # Consider default value
-            return cast_param(param_obj[olc.PARAM_DEFAULT], param_type), olc.MSG_NO_ERR
+            value = cast_param(param_obj[olc.PARAM_DEFAULT], param_type)
+            return value, olc.MSG_NO_ERR
 
     # If here, user provided a parameter
 
     # Cast the value to the type stated in the template
     user_parameter = cast_param(user_parameter, param_type)
-    if use_constraints:
 
+    if use_constraints:
         valid_values = None         # Init valid_values list
 
         # Collect "valid_values" field
@@ -129,10 +143,11 @@ def get_param(param_obj, user_parameter, use_constraints=False):
                 # If not, report
                 return None, get_error_user_not_in_valids(user_parameter, valid_values)
         else:
+            return user_parameter, olc.MSG_NO_ERR
             # If here, the user parameter is provided and the checking on constraints must be done
             # but no "valid_values" list has been imported. To report.
-            msg = f"{olc.MSG_PARAM_ERROR3} {param_obj=}"
-            return None, msg
+        #    msg = f"{olc.MSG_PARAM_ERROR3} {param_obj=}"
+        #    return None, msg
     else:
         # No constrain 
         return user_parameter, olc.MSG_NO_ERR
