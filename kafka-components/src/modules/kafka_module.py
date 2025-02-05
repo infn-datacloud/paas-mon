@@ -92,24 +92,28 @@ def collect_all_msgs_from_topics(*topics):
         collected_msgs[topic].append(message)
     return collected_msgs
 
-def get_consumer_obj(*topics, decode_json=True):
+def get_consumer_obj(*topics, deser_format='str'):
     global bootstrap_servers
     if bootstrap_servers is None: 
         print(BOOTSTRAP_MSG_ERR)
         return
 
-    def derserializer(decode_json_bool):
+    def derserializer(deser_format):
         def decode_str_func(x):
             return x.decode('utf-8')
 
         def decode_json_func(x):
             return json.loads(x.decode('utf-8'))
         
-        if decode_json_bool:
+        if deser_format == 'json':
             return decode_json_func
+        elif deser_format == 'str':
+            return decode_str_func
         else:
             return decode_str_func
-        
+            
+    
+    deser_func = derserializer(deser_format)
     group_base = '-'.join(topics)
     group_id = ''.join(random.choices(string.ascii_uppercase +
                                       string.ascii_lowercase +
@@ -120,7 +124,7 @@ def get_consumer_obj(*topics, decode_json=True):
         group_id = f'{group_base}-{group_id}',
         auto_offset_reset = 'earliest', 
         enable_auto_commit = True,
-        value_deserializer = derserializer(decode_json)
+        value_deserializer = deser_func
     )
 
     return consumer
@@ -141,8 +145,7 @@ def get_consumer_obj_str(*topics):
         group_id = f'{group_base}-{group_id}',
         auto_offset_reset = 'earliest', 
         enable_auto_commit = True,
-        value_deserializer = lambda x: x.decode('utf-8'),
-        consumer_timeout_ms = 500
+        value_deserializer = lambda x:x.decode('utf-8')
     )
 
     return consumer

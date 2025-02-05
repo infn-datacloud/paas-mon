@@ -31,7 +31,7 @@ collected_msgs = km.collect_all_msgs_from_topics(val_templ_topic)
 validated_templates = [message.value for message in collected_msgs[val_templ_topic]]
 tot_msg_num = sum([len(v) for v in collected_msgs.values()])
 interval_s = round(time()-start_time,2)
-km.write_log(msg=f"{tot_msg_num} messages imported in {interval_s} s", status="INIT")
+km.write_log(msg=f"Total {tot_msg_num} messages imported in {interval_s} s", status="INIT")
 km.write_log(msg=f"Imported {len(validated_templates)} validated template(s)", status="INIT")
 
 consumer = km.get_consumer_obj(input_topic, decode_json=False)
@@ -41,6 +41,7 @@ for message in consumer:
     if olp.is_line_to_reject(message): 
        continue
 
+    print(message)
     log_ts, ts = olp.extract_timestamp(message)
     line = olp.extract_info(message)
 
