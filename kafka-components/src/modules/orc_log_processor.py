@@ -1,7 +1,7 @@
 import yaml
 from datetime import datetime
 import json
-import orc_log_processor_conf as olc
+from modules import orc_log_processor_conf as olc
 
 def get_uuid(templ):
     return templ[olc.TEMPL_UUID]
