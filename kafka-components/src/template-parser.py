@@ -38,13 +38,12 @@ consumer = km.get_consumer_obj(input_topic, deser_format='str')
 collect_template = False
 str_template = list()
 for message in consumer:
-    if olp.is_line_to_reject(message): 
+    if olp.is_line_to_reject(message.value): 
        continue
 
-    log_ts, ts = olp.extract_timestamp(message)
-    line = olp.extract_info(message)
+    log_ts, ts, orc_log = olp.extract_info(message.value)
 
-    if olp.is_start_to_collect(ts, line):
+    if olp.is_start_to_collect(ts, orc_log):
         collect_template = True
         continue
     
@@ -52,10 +51,10 @@ for message in consumer:
         collect_template = False
 
     if not ts and collect_template:
-        str_template.append(line) 
+        str_template.append(orc_log) 
 
-    if olp.is_template_meta_data(line):
-        depl_data = olp.extract_user_parameters(line)
+    if olp.is_template_meta_data(orc_log):
+        depl_data = olp.extract_user_parameters(orc_log)
         uuid = olp.get_uuid(depl_data)
         template, is_template = olp.import_template(str_template)  
         template = olp.add_timestamp(template, ts)
