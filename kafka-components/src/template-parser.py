@@ -28,11 +28,11 @@ km.write_log(msg=f"Validated topic: {val_templ_topic}", status="INIT")
 # Import historical messages from topics
 start_time = time()
 collected_msgs = km.collect_all_msgs_from_topics(val_templ_topic)
-validated_templates = [message.value for message in collected_msgs[val_templ_topic]]
+validated_templates_uuids = {message.value['uuid'] for message in collected_msgs[val_templ_topic]}
 tot_msg_num = sum([len(v) for v in collected_msgs.values()])
 interval_s = round(time()-start_time,2)
 km.write_log(msg=f"Total {tot_msg_num} messages imported in {interval_s} s", status="INIT")
-km.write_log(msg=f"Imported {len(validated_templates)} validated template(s)", status="INIT")
+km.write_log(msg=f"Imported {len(validated_templates_uuids)} validated template(s)", status="INIT")
 
 consumer = km.get_consumer_obj(input_topic, deser_format='str')
 collect_template = False
@@ -59,11 +59,12 @@ for message in consumer:
         template, is_template = olp.import_template(str_template)  
         template = olp.add_timestamp(template, ts)
         if is_template:
-            str_val_templ, val_templ, err_msg = olp.get_val_templ(template, depl_data)
+            val_templ, val_templ_uuid, err_msg = olp.get_val_templ(template, depl_data)
             if not err_msg:
-                if str_val_templ not in validated_templates:
+                if val_templ_uuid not in validated_templates_uuids:
                     km.write_output_topic_kafka(val_templ)
                     km.write_log(uuid=uuid, status=olc.LOG_STATUS_OK, msg=olc.LOG_MSG_VALIDATED)
+                    validated_templates_uuids.add(val_templ_uuid)
                 else:
                     km.write_log(uuid=uuid, status=olc.LOG_STATUS_OK, msg=olc.LOG_MSG_VALIDATED_AND_SENT)
             else:

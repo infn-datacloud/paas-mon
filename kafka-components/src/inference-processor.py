@@ -60,5 +60,6 @@ for message in consumer:
         if msg['uuid'] not in output_msgs_uuid:
             km.write_output_topic_kafka(msg)
             km.write_log(msg="Processed and sent", uuid=msg['uuid'], status="PROCESSED-SENT")
+            output_msgs_uuid.add(msg['uuid'])
         else:
             km.write_log(msg="Already present in topic", uuid=msg['uuid'], status="PROCESSED-NOT-SENT")
