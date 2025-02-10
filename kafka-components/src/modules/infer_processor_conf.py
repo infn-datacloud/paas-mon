@@ -2,6 +2,7 @@
 ## Feeded message fields (aka keys)
 F_KAFKA_TS_KEY = 'kafka_ts'
 F_TIMESTAMP_KEY = 'timestamp'
+F_PROVIDER_TO_REJECT = ["CLOUD-CNAF-TB"]
 
 # RALLY CONSTANTS (R prefix)
 ## Rally dataset column names
@@ -13,6 +14,7 @@ R_TIMESTAMP_COL = 'timestamp'
 ## Rally column values
 R_STATUS_FINISHED = 'finished'
 R_TEST_RESULT_TRUE = 'True'
+R_TEST = False
 
 ## Rally provider name mapping
 RALLY_PROVIDER_NAME_MAPPING = {
@@ -75,6 +77,7 @@ PD_GIGABYTES_KEYS = 'gigabytes'
 PD_GPUS_KEY = 'gpus'
 PD_IMAGES_KEY = 'images'
 PD_INSTANCES_KEY = 'instances'
+PD_MSG_VERSION = 'msg_version'
 PD_NETWORK_SERVICES_KEY = "network_services"
 PD_OS_DISTRO_KEY = 'os_distro'
 PD_OS_VERSION_KEY = 'os_version'
@@ -88,6 +91,7 @@ PD_TEMPL_VOLUMES = 'volumes'
 PD_USAGE_KEY = 'usage'
 PD_USER_GROUP_KEY = 'user_group'
 PD_VCPUS_KEY = 'vcpus'
+PD_TEST_TIMESTAMP = "kafka_ts"
 
 ## Constant Collections
 PD_PROVIDER_ID_KEYS = (PD_PROVIDER_NAME_KEY, 
@@ -119,10 +123,14 @@ DD_QUOTA_SUFFIX = '_quota'
 DD_USAGE_SUFFIX = '_usage'
 DD_AGGREGATED_RESOURCES_KEY = 'aggr_resource'
 DD_AGGREGATED_STORAGE_KEY = 'aggregated_storage'
+DD_RALLY_N_DAYS = [30, 7, 1]
+DD_RALLY_DAY = 'd'
 DD_RALLY_VALUE_KEY = 'rally_value'
 DD_TEMPLATE_NAME_KEY = 'template_name'
 DD_TIMESTAMP_KEY = 'timestamp'
 DD_UUID_KEY = 'uuid'
+DD_EXACT_FLAVOR = "exact_flavor"
+DD_EXACT_FLAVORS = "exact_flavors"
 DD_COMP_KEYS = (DD_INSTANCE_KEY, 
                 DD_VCPUS_KEY, 
                 DD_RAM_KEY, 
