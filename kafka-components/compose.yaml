@@ -7,7 +7,7 @@ services:
     environment:
       TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC: orchestrator-logs
       TEMPLATE_PARSER_KAFKA_VAL_TEMPL_TOPIC: validated-templates
-      TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC: logs-parser-templates
+      TEMPLATE_PARSER_KAFKA_LOG_APP_TOPIC: logs-template-parser
       TEMPLATE_PARSER_KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
     
   infer-preprocessor:
