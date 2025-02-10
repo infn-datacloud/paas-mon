@@ -179,3 +179,21 @@ MISC_BEST_MATCHER_KEYS = ((DD_DISK_KEY,  PD_DISK_KEY,      1),
                           (DD_GPUS_KEY,  PD_GPUS_KEY,      1),
                           (DD_RAM_KEY,   PD_RAM_KEY,   1_024),
                           (DD_VCPUS_KEY, PD_VCPUS_KEY,     1))
+
+
+# Environment variables
+## Kafka parameteres
+KAFKA_VAL_TEMPL_TOPIC =   'INFER_PROC_KAFKA_VAL_TEMPL_TOPIC'
+KAFKA_RALLY_TOPIC =       'INFER_PROC_KAFKA_RALLY_TOPIC'
+KAFKA_FEEDER_TOPIC =      'INFER_PROC_KAFKA_FEEDER_TOPIC'
+KAFKA_INFER_TOPIC =       'INFER_PROC_KAFKA_INFER_TOPIC'
+KAFKA_LOG_TOPIC =         'INFER_PROC_KAFKA_LOG_TOPIC'
+KAFKA_BOOTSTRAP_SERVERS = 'INFER_PROC_KAFKA_BOOTSTRAP_SERVERS'
+
+KAFKA_VAL_TEMPL_TOPIC_DEFAULT =   'validated-templates'
+KAFKA_RALLY_TOPIC_DEFAULT =       'rally'
+KAFKA_FEEDER_TOPIC_DEFAULT =      'federation-registry-feeder'
+KAFKA_INFER_TOPIC_DEFAULT =       'ai-ranker-inference'
+KAFKA_LOG_TOPIC_DEFAULT =         'logs-inference-processor'
+
+KAFKA_BOOTSTRAP_SERVERS_DEFAULT = '192.168.21.96:9092'
