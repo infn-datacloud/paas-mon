@@ -58,7 +58,7 @@ for message in consumer:
         dep_data = ip.compute_aggregated_resource(dep_data)    
         msg = ip.get_msg(dep_data)
         if msg['uuid'] not in output_msgs_uuid:
-            km.write_output_topic_kakfa(msg)
+            km.write_output_topic_kafka(msg)
             km.write_log(msg="Processed and sent", uuid=msg['uuid'], status="PROCESSED-SENT")
         else:
             km.write_log(msg="Already present in topic", uuid=msg['uuid'], status="PROCESSED-NOT-SENT")
