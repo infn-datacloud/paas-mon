@@ -29,7 +29,7 @@ km.set_log_topic(log_topic)
 
 # Import historical messages from topics
 start_time = time()
-collected_msgs = km.collect_all_msgs_from_topics(rally_topic, feeder_topic,output_infer_topic)
+collected_msgs = km.collect_all_msgs_from_topics(rally_topic, feeder_topic, output_infer_topic)
 ip.rally_msgs = [message.value for message in collected_msgs[rally_topic]]
 for message in collected_msgs[feeder_topic]:
     ip.update_providers_data(message)

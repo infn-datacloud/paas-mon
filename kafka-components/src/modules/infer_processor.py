@@ -173,7 +173,7 @@ def are_params_inclused(n_obj, f_obj):
                for dn_key, pf_key, f in ipc.MISC_BEST_MATCHER_KEYS])
 
 def are_params_equal(n_obj, f_obj):
-    return all([is_param_inclused(n_obj[dn_key], f_obj[pf_key] / f)
+    return all([is_param_equal(n_obj[dn_key], f_obj[pf_key] / f)
                for dn_key, pf_key, f in ipc.MISC_BEST_MATCHER_KEYS])
 
 def get_best_flavor(node_obj, prov_flavors):
