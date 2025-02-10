@@ -165,9 +165,8 @@ def get_val_templ(template, depl_data):
         if err_msg:
             # Forward message error outside
             msg = f"Error during the validation of '{param_key}' parameter. Message: {err_msg}"
-            str_template = '{}'
             template = {}
-            return str_template, template, msg
+            return template, "", msg
         else:
             template[olc.TEMPL_TOPOLOGY_TEMPL][olc.TEMLP_INPUTS][param_key] = param
 
@@ -188,5 +187,5 @@ def get_val_templ(template, depl_data):
         find_get_input(node_data)
                                     
     err_msg = ""
-    str_template = json.dumps(template, sort_keys=True)
-    return str_template, template, err_msg
+    template_uuid = template['uuid']
+    return template, template_uuid, err_msg
