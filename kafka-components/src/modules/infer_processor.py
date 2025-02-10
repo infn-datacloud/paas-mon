@@ -266,7 +266,7 @@ def compute_aggregated_resource(data):
         data[ipc.DD_AGGREGATED_STORAGE_KEY][dep_stor_key] = acc_value
     return data
 
-def get_msg(dep_data):
+def get_msg(dep_data: dict) -> dict:
     m = {k:dep_data[k] for k in ipc.DD_KEYS_TO_IMPORT} 
     m[ipc.O_MSG_VERSION] = ipc.O_MSG_VERSION_VALUE
     m[ipc.O_PROVIDERS_KEY] = list()

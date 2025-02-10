@@ -59,10 +59,10 @@ for message in consumer:
         template, is_template = olp.import_template(str_template)  
         template = olp.add_timestamp(template, ts)
         if is_template:
-            validated_template, err_msg = olp.get_val_templ(template, depl_data)
+            str_val_templ, val_templ, err_msg = olp.get_val_templ(template, depl_data)
             if not err_msg:
-                if validated_template not in validated_templates:
-                    km.write_output_topic_kakfa(validated_template)
+                if str_val_templ not in validated_templates:
+                    km.write_output_topic_kafka(val_templ)
                     km.write_log(uuid=uuid, status=olc.LOG_STATUS_OK, msg=olc.LOG_MSG_VALIDATED)
                 else:
                     km.write_log(uuid=uuid, status=olc.LOG_STATUS_OK, msg=olc.LOG_MSG_VALIDATED_AND_SENT)

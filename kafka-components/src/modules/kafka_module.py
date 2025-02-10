@@ -48,7 +48,7 @@ def write_log_to_kafka(data):
     write_msg_to_kafka(data, log_topic)
     
 # write validated template in kafka
-def write_output_topic_kakfa(data):
+def write_output_topic_kafka(data):
     if output_topic is not None:
         write_msg_to_kafka(data, output_topic)
     else:

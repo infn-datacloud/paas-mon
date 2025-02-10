@@ -51,7 +51,7 @@ kafka_module.write_log(msg=f"Imported data for {len(infer_processor.prov_data)} 
 kafka_module.write_log(msg=f"Imported {len(output_msgs_uuid)} uuid(s)", status="INIT")
 
 # Start Processing
-consumer = kafka_module.get_consumer_obj(rally_topic, feeder_topic, val_templ_topic)
+consumer = kafka_module.get_consumer_obj(rally_topic, feeder_topic, val_templ_topic, deser_format='json')
 
 for message in consumer:
     topic = str(message.topic)
@@ -63,7 +63,7 @@ for message in consumer:
         dep_data = infer_processor.extract_data_from_valid_template(message.value)
         dep_data = infer_processor.best_match_finder(dep_data, infer_processor.prov_data)
         dep_data = infer_processor.remove_null(dep_data)
-        dep_data = infer_processor.compute_aggregated_resource(dep_data)
+        dep_data = infer_processor.compute_aggregated_resource(dep_data)    
         msg = infer_processor.get_msg(dep_data)
         if msg['uuid'] not in output_msgs_uuid:
             kafka_module.write_output_topic_kakfa(msg)
