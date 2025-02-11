@@ -244,8 +244,6 @@ def compute_aggregated_resource(data):
                             for node in nodes 
                             if node[ipc.DD_INSTANCE_KEY] > 0)
             aggr_res[fl_key + ipc.DD_REQUIRED_SUFFIX] = acc_value
-        acc_value = sum(node[ipc.DD_EXACT_FLAVOR] for node in nodes if node[ipc.DD_INSTANCE_KEY] > 0)
-        aggr_res[ipc.DD_EXACT_FLAVORS] = acc_value
         acc_value = sum([node[ipc.DD_INSTANCE_KEY] for node in nodes])
         aggr_res[ipc.DD_INSTANCE_KEY + ipc.DD_REQUIRED_SUFFIX] = acc_value
         dep_prov_obj[ipc.DD_AGGREGATED_RESOURCES_KEY] = aggr_res
@@ -272,7 +270,9 @@ def get_msg(dep_data: dict) -> dict:
     m[ipc.O_PROVIDERS_KEY] = list()
     for provider in dep_data[ipc.DD_PROVIDERS_KEY].values():
         p_info = provider[ipc.DD_AGGREGATED_RESOURCES_KEY]
+        p_info[ipc.DD_EXACT_FLAVORS] = p_info[ipc.DD_EXACT_FLAVOR + ipc.DD_REQUIRED_SUFFIX]
         del p_info[ipc.DD_DISK_KEY + ipc.DD_REQUIRED_SUFFIX]
+        del p_info[ipc.DD_EXACT_FLAVOR + ipc.DD_REQUIRED_SUFFIX]
         p_info[ipc.O_PROVIDER_NAME_KEY] = provider[ipc.DD_PROVIDER_NAME_KEY]
         p_info[ipc.O_REGION_NAME_KEY] = provider[ipc.DD_REGION_NAME_KEY]
         # p_info[ipc.O_IMAGES_KEY] = provider[ipc.DD_IMAGES_KEY]
