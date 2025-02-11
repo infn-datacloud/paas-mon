@@ -146,7 +146,8 @@ DD_FLAVOR_KEYS = (DD_DISK_KEY,
                   DD_VCPUS_KEY)
 
 DD_AGGR_KEYS = (*DD_FLAVOR_KEYS,
-                DD_FLOATINGIPS_KEY)
+                DD_FLOATINGIPS_KEY,
+                DD_EXACT_FLAVOR)
 
 DD_STORAGE_SEC_KEYS = (DD_STORAGE_KEY, 
                        DD_VOLUMES_KEY)
