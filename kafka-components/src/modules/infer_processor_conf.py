@@ -92,6 +92,10 @@ PD_USAGE_KEY = 'usage'
 PD_USER_GROUP_KEY = 'user_group'
 PD_VCPUS_KEY = 'vcpus'
 PD_TEST_TIMESTAMP = "kafka_ts"
+PD_OVERBOOKING_CPU = "overbooking_cpu"
+PD_OVERBOOKING_RAM = "overbooking_ram"
+PD_BANDWITDH_IN = "bandwidth_in"
+PD_BANDWITDH_OUT = "bandwidth_out"
 
 ## Constant Collections
 PD_PROVIDER_ID_KEYS = (PD_PROVIDER_NAME_KEY, 
@@ -131,6 +135,10 @@ DD_TIMESTAMP_KEY = 'timestamp'
 DD_UUID_KEY = 'uuid'
 DD_EXACT_FLAVOR = "exact_flavor"
 DD_EXACT_FLAVORS = "exact_flavors"
+DD_OVERBOOKING_CPU = "overbooking_cpu"
+DD_OVERBOOKING_RAM = "overbooking_ram"
+DD_BANDWITDH_IN = "bandwidth_in"
+DD_BANDWITDH_OUT = "bandwidth_out"
 DD_COMP_KEYS = (DD_INSTANCE_KEY, 
                 DD_VCPUS_KEY, 
                 DD_RAM_KEY, 
@@ -163,8 +171,12 @@ O_PROVIDER_NAME_KEY = 'provider_name'
 O_REGION_NAME_KEY = 'region_name'
 O_IMAGES_KEY = 'images'
 O_TEST_FAILURE_PERC = 'test_failure_perc'
+O_OVERBOOKING_CPU = "overbooking_cpu"
+O_OVERBOOKING_RAM = "overbooking_ram"
+O_BANDWITDH_IN = "bandwidth_in"
+O_BANDWITDH_OUT = "bandwidth_out"
 O_MSG_VERSION = 'msg_version'
-O_MSG_VERSION_VALUE = '1.0.0'
+O_MSG_VERSION_VALUE = '1.1.0'
 
 # MISCELLANEOUS
 M_QUOTAS_KEYS = {
@@ -181,6 +193,23 @@ MISC_BEST_MATCHER_KEYS = ((DD_DISK_KEY,  PD_DISK_KEY,      1),
                           (DD_RAM_KEY,   PD_RAM_KEY,   1_024),
                           (DD_VCPUS_KEY, PD_VCPUS_KEY,     1))
 
+BASIC_PROV_DATA_INFO = [
+    (DD_PROVIDER_NAME_KEY, PD_PROVIDER_NAME_KEY),
+    (DD_REGION_NAME_KEY,   PD_REGION_NAME_KEY),
+    (DD_OVERBOOKING_CPU, PD_OVERBOOKING_CPU),
+    (DD_OVERBOOKING_RAM, PD_OVERBOOKING_RAM),
+    (DD_BANDWITDH_IN, PD_BANDWITDH_IN),
+    (DD_BANDWITDH_OUT, PD_BANDWITDH_OUT)
+]
+
+O_PROV_DATA = [
+    (O_PROVIDER_NAME_KEY, DD_PROVIDER_NAME_KEY),
+    (O_REGION_NAME_KEY,   DD_REGION_NAME_KEY),
+    (O_OVERBOOKING_CPU, DD_OVERBOOKING_CPU),
+    (O_OVERBOOKING_RAM, DD_OVERBOOKING_RAM),
+    (O_BANDWITDH_IN, DD_BANDWITDH_IN),
+    (O_BANDWITDH_OUT, DD_BANDWITDH_OUT)
+]
 
 # Environment variables
 ## Kafka parameteres
@@ -196,5 +225,4 @@ KAFKA_RALLY_TOPIC_DEFAULT =       'rally'
 KAFKA_FEEDER_TOPIC_DEFAULT =      'federation-registry-feeder'
 KAFKA_INFER_TOPIC_DEFAULT =       'ai-ranker-inference'
 KAFKA_LOG_TOPIC_DEFAULT =         'logs-inference-processor'
-
 KAFKA_BOOTSTRAP_SERVERS_DEFAULT = '192.168.21.96:9092'

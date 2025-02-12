@@ -141,10 +141,12 @@ def extract_data_from_valid_template(val_templ: dict) -> dict:
 def get_info_from_provider(obj: dict) -> dict:
     info = {ipc.DD_IMAGES_KEY: False,
             ipc.DD_QUOTAS_KEY: dict(),
-            ipc.DD_BEST_FLAVOR_KEY: dict(),
-            ipc.DD_PROVIDER_NAME_KEY: obj[ipc.PD_PROVIDER_NAME_KEY],
-            ipc.DD_REGION_NAME_KEY: obj[ipc.PD_REGION_NAME_KEY]
+            ipc.DD_BEST_FLAVOR_KEY: dict()
            }   
+    
+    info.update(
+        {dd_key:obj[pd_key] for dd_key, pd_key in ipc.BASIC_PROV_DATA_INFO if pd_key in obj}
+    )
     return info
 
 def create_key(base: str, usage: bool) -> str:
@@ -273,8 +275,9 @@ def get_msg(dep_data: dict) -> dict:
         p_info[ipc.DD_EXACT_FLAVORS] = p_info[ipc.DD_EXACT_FLAVOR + ipc.DD_REQUIRED_SUFFIX]
         del p_info[ipc.DD_DISK_KEY + ipc.DD_REQUIRED_SUFFIX]
         del p_info[ipc.DD_EXACT_FLAVOR + ipc.DD_REQUIRED_SUFFIX]
-        p_info[ipc.O_PROVIDER_NAME_KEY] = provider[ipc.DD_PROVIDER_NAME_KEY]
-        p_info[ipc.O_REGION_NAME_KEY] = provider[ipc.DD_REGION_NAME_KEY]
+        for o_key,dd_key in ipc.O_PROV_DATA:
+            if dd_key in provider:
+                p_info[o_key] = provider[dd_key]
         # p_info[ipc.O_IMAGES_KEY] = provider[ipc.DD_IMAGES_KEY]
         for k in provider:
             if ipc.DD_RALLY_VALUE_KEY in k:
