@@ -8,7 +8,6 @@ from modules import training_processor_conf as tpc
 import os
 from modules import kafka_module as km
 from time import time
-import json
  
 # Kafka parameteres
 orc_log_topic =     os.environ.get(tpc.KAFKA_ORC_LOG_TOPIC,   
@@ -45,6 +44,7 @@ km.write_log(msg=f"Imported {len(tp.infer_msgs)} provider candidates for deploym
 km.write_log(msg=f"Imported {len(tp.training_sent)} training set entries", status="INIT")
 
 consumer = km.get_consumer_obj(orc_log_topic, ai_infer_topic, deser_format='str')
+
 for kafka_msg in consumer:
     topic = kafka_msg.topic
     msg = kafka_msg.value

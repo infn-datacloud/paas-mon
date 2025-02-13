@@ -64,15 +64,15 @@ def update_providers_data(msg):
 
 def import_size(str_value):
     if   ipc.VT_GB_SIZE_SUFFIX in str_value: 
-        int_value = int(str_value.replace(ipc.VT_GB_SIZE_SUFFIX, "")) 
+        value = float(str_value.replace(ipc.VT_GB_SIZE_SUFFIX, "")) 
     elif ipc.VT_TB_SIZE_SUFFIX in str_value: 
-        int_value = int(str_value.replace(ipc.VT_TB_SIZE_SUFFIX, "")) * 1_000
+        value = float(str_value.replace(ipc.VT_TB_SIZE_SUFFIX, "")) * 1_000
     elif ipc.VT_PB_SIZE_SUFFIX in str_value: 
-        int_value = int(str_value.replace(ipc.VT_PB_SIZE_SUFFIX, "")) * 1_000 * 1_000
+        value = float(str_value.replace(ipc.VT_PB_SIZE_SUFFIX, "")) * 1_000 * 1_000
     else:
         #logging.warning(f"Impossible parse di memory {str_value}")
-        int_value = -1
-    return int_value
+        value = -1
+    return value
 
 def get_compute_info(vt_c_obj: dict) -> dict:
     """vt_c_obj: Validated Template Computing Section Object"""
