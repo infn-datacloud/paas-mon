@@ -34,6 +34,8 @@ def import_ai_ranker_training_msg(msg_json:dict):
     training_sent.append(t_key)
     
 def import_ai_ranker_inference_msg(ari_json:dict):
+    if isinstance(ari_json,str):
+        ari_json = json.loads(ari_json)
     for ari_prov_data in ari_json[tpc.ARI_PROVIDERS]:
         ari_dict = ari_prov_data.copy()
         ari_dict.update({ 
