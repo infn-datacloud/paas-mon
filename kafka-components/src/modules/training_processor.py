@@ -44,6 +44,7 @@ def import_ai_ranker_inference_msg(ari_json:dict):
             })
         uuid_key = get_key(ari_dict)
         infer_msgs[uuid_key] = ari_dict 
+        km.write_log(uuid=uuid_key, status="ADDED AI INFER", msg="FATTO")
 
 def get_info_from_line(msg:str, split_str:str)-> dict:
     msg = msg if len(msg) < 8100 else msg.strip() + '"}'
@@ -88,15 +89,16 @@ def send_msg(data: dict):
             })
         if get_key(output_msg) not in training_sent:
             km.write_output_topic_kafka(output_msg)
-            km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK, msg=tpc.LOG_STATUS_COLLECTED_AND_SENT)
+            km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK_SENT, msg=tpc.LOG_STATUS_COLLECTED_AND_SENT)
             import_ai_ranker_training_msg(output_msg)
         else:
-            km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK, msg=tpc.LOG_STATUS_COLLECTED)
+            km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK_NOT_SENT, msg=tpc.LOG_STATUS_COLLECTED)
     
 def update_sub_event(msg):
     global depl_status
     msg_data = get_info_from_line(msg, tpc.ORCLOG_SUBMISSION_LINE)
     uuid = msg_data[tpc.INT_UUID]
+    km.write_log(timestamp=msg_data['timestamp'], msg=f"{tpc.LOG_SUBMISSION_EVENT}{uuid}", status=tpc.STATUS_SUBMITTED)
     if uuid not in depl_status:
         depl_status[uuid] = init_state_dep(msg_data)
     else:
@@ -133,6 +135,7 @@ def update_completed_event(msg):
     global depl_status
     msg_data = get_info_from_line(msg, tpc.ORCLOG_COMPLETED_LINE)
     uuid = msg_data[tpc.INT_UUID]
+    km.write_log(timestamp=msg_data['timestamp'], msg=f"{tpc.LOG_SUCCESSFUL_EVENT}{uuid}", status=tpc.STATUS_COMPLETED)
     if uuid in depl_status:
         # Evento di CREATE_COMPLETED dopo un CREATE_IN_PROGRESS
         # L'unico che dovrebbe accadere
@@ -159,6 +162,7 @@ def update_error_event(msg):
     global depl_status
     msg_data = get_info_from_line(msg, tpc.ORCLOG_ERROR_LINE)
     uuid = msg_data[tpc.INT_UUID]
+    km.write_log(timestamp=msg_data['timestamp'], msg=f"{tpc.LOG_ERROR_EVENT}{uuid}", status=tpc.STATUS_FAILED)
     final_error = True if tpc.ORCLOG_ERROR_SUMMARY_LINE in msg_data[tpc.INT_STATUS_REASON] else False
     if final_error:
         # Se qui, allora il messaggio di errore e' quello riassuntivo.
