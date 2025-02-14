@@ -93,7 +93,7 @@ def collect_all_msgs_from_topics(*topics):
         value_deserializer = lambda x: json.loads(x.decode('utf-8')),
         max_partition_fetch_bytes = 100_000_000,
         fetch_max_bytes = 50_000_000,
-        consumer_timeout_ms = 1000
+        consumer_timeout_ms = 10000
     )
 
     collected_msgs = {topic:list() for topic in topics}

@@ -49,6 +49,7 @@ def import_ai_ranker_inference_msg(ari_json:dict):
         else:
             km.write_log(uuid=uuid_key, status="INFER_MSG_ADDED_IN_DB", msg=f"Added new deployment-provider-region. Now {len(depl_data)} elements")
         depl_data[uuid_key] = ari_dict 
+        check_and_send(uuid_key)
             
 def get_info_from_line(msg:str, split_str:str)-> dict:
     msg = msg if len(msg) < 8100 else msg.strip() + '"}'
