@@ -93,6 +93,8 @@ def send_msg(data: dict):
             import_ai_ranker_training_msg(output_msg)
         else:
             km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK_NOT_SENT, msg=tpc.LOG_STATUS_COLLECTED)
+    else:
+        km.write_log(uuid=uuid, status=tpc.LOG_STATUS_NOT_UUID_FOUND, msg=tpc.LOG_STATUS_COLLECTED)
     
 def update_sub_event(msg):
     global depl_status

@@ -94,7 +94,7 @@ LOG_SUBMISSION_EVENT = "Detected Submission event for uuid: "
 LOG_SUCCESSFUL_EVENT = "Detected Successful event for uuid: "
 LOG_ERROR_EVENT = "Detected Error event for uuid: "
 
-
+LOG_STATUS_NOT_UUID_FOUND = "OK_NOT_UUID_FOUND"
 LOG_STATUS_OK_SENT = "OK_SENT"
 LOG_STATUS_OK_NOT_SENT = "OK_NOT_SENT"
 LOG_STATUS_COLLECTED_AND_SENT = "Status Collected and Sent"
