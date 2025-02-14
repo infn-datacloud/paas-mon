@@ -4,7 +4,7 @@ from modules import kafka_module as km
 from datetime import datetime
 
 # Data structures
-training_sent = list()
+training_sent = set()
 depl_data = dict()
 depl_status = dict()
 
@@ -29,12 +29,14 @@ def get_key(obj):
 
 # Import training messages
 def import_ai_ranker_training_msg(msg_json:dict):
-    t_key = get_key(msg_json)
-    training_sent.append(t_key)
+    uuid_key = get_key(msg_json)
+    training_sent.add(uuid_key)
+    km.write_log(uuid=uuid_key, status="IMPORTING_TRAINING_MSG", msg=f"Added new training message. Now imported {len(training_sent)} messages")
     
 def import_ai_ranker_inference_msg(ari_json:dict):
     if isinstance(ari_json,str):
         ari_json = json.loads(ari_json)
+        km.write_log(uuid=ari_json['uuid'], status="IMPORTING_STR_INFER_MSG", msg="Imported to JSON the string inference message")
     for ari_prov_data in ari_json[tpc.ARI_PROVIDERS]:
         ari_dict = ari_prov_data | { 
             k:v for k,v in ari_json.items()
@@ -42,12 +44,13 @@ def import_ai_ranker_inference_msg(ari_json:dict):
             }
         uuid_key = get_key(ari_dict)
         if uuid_key in depl_data:
+            km.write_log(uuid=uuid_key, status="ALREADY_STORE_INFO", msg="Already present in memory information about this deployment. Merging with the deployment status and sending")
             merge_and_send(dep_status=depl_data[uuid_key], infer_data=ari_dict)
+            del depl_data[uuid_key]
         else:
-            depl_data[uuid_key] = ari_dict 
             km.write_log(uuid=uuid_key, status="AI_RANKER_NEW_MSG", msg="Added new deployment-provider-region")
+            depl_data[uuid_key] = ari_dict 
             
-
 def get_info_from_line(msg:str, split_str:str)-> dict:
     msg = msg if len(msg) < 8100 else msg.strip() + '"}'
     msg_data = json.loads(msg.split(split_str)[1].strip())
@@ -83,25 +86,23 @@ def init_state_dep(msg_data: dict):
 
 def merge_and_send(dep_status:dict, infer_data:dict):
     output_msg = dep_status | infer_data
-    uuid = output_msg['uuid']
-    t_key = get_key(output_msg)
-    if t_key in training_sent:
-        km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK_NOT_SENT, msg=tpc.LOG_STATUS_COLLECTED )
+    uuid_key = get_key(output_msg)
+    if uuid_key in training_sent:
+        km.write_log(uuid=uuid_key, status=tpc.LOG_STATUS_OK_NOT_SENT, msg=tpc.LOG_STATUS_COLLECTED )
     else:
         km.write_output_topic_kafka(output_msg)
         import_ai_ranker_training_msg(output_msg)
-        km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK_SENT, msg=tpc.LOG_STATUS_COLLECTED_AND_SENT)
+        km.write_log(uuid=uuid_key, status=tpc.LOG_STATUS_OK_SENT, msg=tpc.LOG_STATUS_COLLECTED_AND_SENT)
 
 def record_dep_status(data: dict):
-    uuid = data[tpc.INT_UUID]
-    uuid_key = f"{data[tpc.INT_PROVIDER_ID]}-{uuid}".lower()
+    uuid_key = f"{data[tpc.INT_PROVIDER_ID]}-{data[tpc.INT_UUID]}".lower()
     dep_status = { art_k:data[o_k] for art_k,o_k in tpc.ART_FIELDS_TO_COPY }
     if uuid_key in depl_data:
+        km.write_log(uuid=uuid_key, status="FOUND_INFER_MSG", msg="Found a infer message containing information about this deployment. Sending...")
         merge_and_send(dep_status=dep_status, infer_data=depl_data[uuid_key])
-        km.write_log(uuid=uuid, status="FOUND_INFER_MSG", msg="Found a infer message containing information about this deployment. Sending...")
     else:
+        km.write_log(uuid=uuid_key, status="NOT_FOUND_INFER_MSG", msg="Not found any infer messagecontainer information about this deployment. Stored.")
         depl_data[uuid_key] = dep_status
-        km.write_log(uuid=uuid, status="NOT_FOUND_INFER_MSG", msg="Not found any infer messagecontainer information about this deployment. Stored.")
 
 def update_sub_event(msg):
     global depl_status
