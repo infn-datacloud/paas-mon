@@ -7,6 +7,7 @@ from datetime import datetime
 training_sent = set()
 depl_data = dict()
 depl_status = dict()
+depl_status_db = dict()
 
 # Functions
 def is_line_to_reject(line):
@@ -44,12 +45,10 @@ def import_ai_ranker_inference_msg(ari_json:dict):
             }
         uuid_key = get_key(ari_dict)
         if uuid_key in depl_data:
-            km.write_log(uuid=uuid_key, status="ALREADY_STORE_INFO", msg="Already present in memory information about this deployment. Merging with the deployment status and sending")
-            merge_and_send(dep_status=depl_data[uuid_key], infer_data=ari_dict)
-            del depl_data[uuid_key]
+            km.write_log(uuid=uuid_key, status="INFER_MSG_ALREADY_IN_DB", msg="Already present in memory information about this deployment. Overwrite")
         else:
-            km.write_log(uuid=uuid_key, status="AI_RANKER_NEW_MSG", msg="Added new deployment-provider-region")
-            depl_data[uuid_key] = ari_dict 
+            km.write_log(uuid=uuid_key, status="INFER_MSG_ADDED_IN_DB", msg=f"Added new deployment-provider-region. Now {len(depl_data)} elements")
+        depl_data[uuid_key] = ari_dict 
             
 def get_info_from_line(msg:str, split_str:str)-> dict:
     msg = msg if len(msg) < 8100 else msg.strip() + '"}'
@@ -84,25 +83,24 @@ def init_state_dep(msg_data: dict):
             tpc.INT_PROVIDER_ID: get_provider_id(msg_data)
            }
 
-def merge_and_send(dep_status:dict, infer_data:dict):
-    output_msg = dep_status | infer_data
-    uuid_key = get_key(output_msg)
-    if uuid_key in training_sent:
-        km.write_log(uuid=uuid_key, status=tpc.LOG_STATUS_OK_NOT_SENT, msg=tpc.LOG_STATUS_COLLECTED )
-    else:
+def check_and_send(uuid_key: str):
+    if uuid_key in depl_status_db and uuid_key in depl_data:
+        output_msg = depl_status_db[uuid_key] | depl_data[uuid_key]
         km.write_output_topic_kafka(output_msg)
         import_ai_ranker_training_msg(output_msg)
         km.write_log(uuid=uuid_key, status=tpc.LOG_STATUS_OK_SENT, msg=tpc.LOG_STATUS_COLLECTED_AND_SENT)
+        del depl_status_db[uuid_key]
+        del depl_data[uuid_key]
 
 def record_dep_status(data: dict):
     uuid_key = f"{data[tpc.INT_PROVIDER_ID]}-{data[tpc.INT_UUID]}".lower()
     dep_status = { art_k:data[o_k] for art_k,o_k in tpc.ART_FIELDS_TO_COPY }
-    if uuid_key in depl_data:
-        km.write_log(uuid=uuid_key, status="FOUND_INFER_MSG", msg="Found a infer message containing information about this deployment. Sending...")
-        merge_and_send(dep_status=dep_status, infer_data=depl_data[uuid_key])
+    if uuid_key in depl_status_db:
+        km.write_log(uuid=uuid_key, status="DEP_STATUS_ALREADY_PRESENT", msg="[Warning] Deployment status already in the deploymen status DB. Overwrite")
     else:
-        km.write_log(uuid=uuid_key, status="NOT_FOUND_INFER_MSG", msg="Not found any infer messagecontainer information about this deployment. Stored.")
-        depl_data[uuid_key] = dep_status
+        km.write_log(uuid=uuid_key, status="ADD_DEP_STATUS_TO_DB", msg="[Debug] Added deployment status to DB.")
+    depl_status_db[uuid_key] = dep_status
+    check_and_send(uuid_key)
 
 def update_sub_event(msg):
     global depl_status
