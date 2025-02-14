@@ -40,7 +40,7 @@ interval_s = round(time()-start_time,2)
 km.write_log(msg=f"{tot_msg_num} messages imported in {interval_s} s", status="INIT")
 for k,v in collected_msgs.items():
     km.write_log(msg=f"Collected {len(v)} messages from '{k}' topic", status="INIT")
-km.write_log(msg=f"Imported {len(tp.infer_msgs)} provider candidates for deployments", status="INIT")
+km.write_log(msg=f"Imported {len(tp.depl_data)} provider candidates for deployments", status="INIT")
 km.write_log(msg=f"Imported {len(tp.training_sent)} training set entries", status="INIT")
 
 consumer = km.get_consumer_obj(orc_log_topic, ai_infer_topic, deser_format='str')
