@@ -6,7 +6,6 @@ from datetime import datetime
 # Data structures
 training_sent = list()
 depl_data = dict()
-training = list()
 depl_status = dict()
 
 # Functions
@@ -85,9 +84,13 @@ def init_state_dep(msg_data: dict):
 def merge_and_send(dep_status:dict, infer_data:dict):
     output_msg = dep_status | infer_data
     uuid = output_msg['uuid']
-    km.write_output_topic_kafka(output_msg)
-    import_ai_ranker_training_msg(output_msg)
-    km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK_SENT, msg=tpc.LOG_STATUS_COLLECTED_AND_SENT)
+    t_key = get_key(output_msg)
+    if t_key in training_sent:
+        km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK_NOT_SENT, msg=tpc.LOG_STATUS_COLLECTED )
+    else:
+        km.write_output_topic_kafka(output_msg)
+        import_ai_ranker_training_msg(output_msg)
+        km.write_log(uuid=uuid, status=tpc.LOG_STATUS_OK_SENT, msg=tpc.LOG_STATUS_COLLECTED_AND_SENT)
 
 def record_dep_status(data: dict):
     uuid = data[tpc.INT_UUID]
