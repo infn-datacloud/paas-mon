@@ -3,13 +3,14 @@ import random
 import json
 from kafka import KafkaConsumer, KafkaProducer # type: ignore
 from datetime import datetime
+import pytz
 
 log_topic =  None
 output_topic = None
 bootstrap_servers = None
 
 BOOTSTRAP_MSG_ERR: str = "Bootstrap_servers is not set"
-SYSLOG_TS_FORMAT   = "%Y-%m-%dT%H:%M:%S%z" # YYYY-MM-DD HH:MM:SS+ZZ:ZZ
+SYSLOG_TS_FORMAT   = "%Y-%m-%dT%H:%M:%S%z" # YYYY-MM-DDTHH:MM:SS+ZZ:ZZ
 
 def set_bootstrap_servers(b_servers):
     global bootstrap_servers
@@ -58,7 +59,8 @@ def write_output_topic_kafka(data):
 # Send preformatted message log to kafka
 def write_log(status, msg, timestamp=None, uuid=None):
     if timestamp is None:
-        timestamp = datetime.now().strftime(SYSLOG_TS_FORMAT)
+        ts_now = datetime.now(pytz.timezone('Europe/Rome'))
+        timestamp = ts_now.strftime(SYSLOG_TS_FORMAT)
     log = f"timestamp={timestamp}, status={status}"
     if uuid is not None:
         log +=f", uuid={uuid}"
