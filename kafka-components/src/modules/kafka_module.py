@@ -19,7 +19,13 @@ def set_bootstrap_servers(b_servers):
 def set_log_topic(topic):
     global log_topic
     log_topic = topic
-    write_log(status="INIT_COMPONENT", msg="\n\n###############################################\n\n    INIT    \n\n###############################################\n\n")
+    write_log(status="INIT_COMPONENT", msg="")
+    write_log(status="INIT_COMPONENT", msg="###############################################")
+    write_log(status="INIT_COMPONENT", msg="")
+    write_log(status="INIT_COMPONENT", msg="                     INIT                      ")
+    write_log(status="INIT_COMPONENT", msg="")
+    write_log(status="INIT_COMPONENT", msg="###############################################")
+    write_log(status="INIT_COMPONENT", msg="")
 
 def set_output_topic(topic):
     global output_topic

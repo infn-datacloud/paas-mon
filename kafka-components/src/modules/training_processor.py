@@ -91,6 +91,13 @@ def check_and_send(uuid_key: str):
         km.write_log(uuid=uuid_key, status=tpc.LOG_STATUS_OK_SENT, msg=tpc.LOG_STATUS_COLLECTED_AND_SENT)
         del depl_status_db[uuid_key]
         del depl_data[uuid_key]
+    else:
+        if uuid_key not in depl_status_db:
+            km.write_log(uuid=uuid_key, status="NOT_SENT_BECAUSE_NOT_IN_DEPL_STATUS_DB", msg="[Debug]")
+        if uuid_key not in depl_data:
+            km.write_log(uuid=uuid_key, status="NOT_SENT_BECAUSE_NOT_IN_DEPL_DATA_DB", msg="[Debug]")
+        if uuid_key in training_sent:
+            km.write_log(uuid=uuid_key, status="NOT_SENT_BECAUSE_IN_TRAINING_SENT", msg="[Debug]")
 
 def record_dep_status(data: dict):
     uuid_key = f"{data[tpc.INT_PROVIDER_ID]}-{data[tpc.INT_UUID]}".lower()
@@ -106,7 +113,7 @@ def update_sub_event(msg):
     global depl_status
     msg_data = get_info_from_line(msg, tpc.ORCLOG_SUBMISSION_LINE)
     uuid = msg_data[tpc.INT_UUID]
-    km.write_log(timestamp=msg_data['timestamp'], msg=f"{tpc.LOG_SUBMISSION_EVENT}{uuid}", status=tpc.STATUS_SUBMITTED)
+    km.write_log(msg=f"{tpc.LOG_SUBMISSION_EVENT}{uuid}", status=tpc.STATUS_SUBMITTED)
     if uuid not in depl_status:
         depl_status[uuid] = init_state_dep(msg_data)
     else:
@@ -143,7 +150,7 @@ def update_completed_event(msg):
     global depl_status
     msg_data = get_info_from_line(msg, tpc.ORCLOG_COMPLETED_LINE)
     uuid = msg_data[tpc.INT_UUID]
-    km.write_log(timestamp=msg_data['timestamp'], msg=f"{tpc.LOG_SUCCESSFUL_EVENT}{uuid}", status=tpc.STATUS_COMPLETED)
+    km.write_log(msg=f"{tpc.LOG_SUCCESSFUL_EVENT}{uuid}", status=tpc.STATUS_COMPLETED)
     if uuid in depl_status:
         # Evento di CREATE_COMPLETED dopo un CREATE_IN_PROGRESS
         # L'unico che dovrebbe accadere
@@ -170,7 +177,7 @@ def update_error_event(msg):
     global depl_status
     msg_data = get_info_from_line(msg, tpc.ORCLOG_ERROR_LINE)
     uuid = msg_data[tpc.INT_UUID]
-    km.write_log(timestamp=msg_data['timestamp'], msg=f"{tpc.LOG_ERROR_EVENT}{uuid}", status=tpc.STATUS_FAILED)
+    km.write_log(msg=f"{tpc.LOG_ERROR_EVENT}{uuid}", status=tpc.STATUS_FAILED)
     final_error = True if tpc.ORCLOG_ERROR_SUMMARY_LINE in msg_data[tpc.INT_STATUS_REASON] else False
     if final_error:
         # Se qui, allora il messaggio di errore e' quello riassuntivo.
