@@ -32,7 +32,7 @@ def get_key(obj):
 def import_ai_ranker_training_msg(msg_json:dict):
     uuid_key = get_key(msg_json)
     training_sent.add(uuid_key)
-    km.write_log(uuid=uuid_key, status="IMPORTING_TRAINING_MSG", msg=f"Added new training message. Now imported {len(training_sent)} messages")
+    km.write_log(uuid=uuid_key, status="TAG_TRAINING_MSG_AS_SENT", msg=f"Added new training message. Now imported {len(training_sent)} messages")
     
 def import_ai_ranker_inference_msg(ari_json:dict):
     if isinstance(ari_json,str):
@@ -84,7 +84,7 @@ def init_state_dep(msg_data: dict):
            }
 
 def check_and_send(uuid_key: str):
-    if uuid_key in depl_status_db and uuid_key in depl_data:
+    if uuid_key in depl_status_db and uuid_key in depl_data and uuid_key not in training_sent:
         output_msg = depl_status_db[uuid_key] | depl_data[uuid_key]
         km.write_output_topic_kafka(output_msg)
         import_ai_ranker_training_msg(output_msg)
