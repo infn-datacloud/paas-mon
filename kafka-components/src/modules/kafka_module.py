@@ -9,6 +9,7 @@ output_topic = None
 bootstrap_servers = None
 
 BOOTSTRAP_MSG_ERR: str = "Bootstrap_servers is not set"
+SYSLOG_TS_FORMAT   = "%Y-%m-%dT%H:%M:%S%z" # YYYY-MM-DD HH:MM:SS+ZZ:ZZ
 
 def set_bootstrap_servers(b_servers):
     global bootstrap_servers
@@ -57,7 +58,7 @@ def write_output_topic_kafka(data):
 # Send preformatted message log to kafka
 def write_log(status, msg, timestamp=None, uuid=None):
     if timestamp is None:
-        timestamp = datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%f")[:23] 
+        timestamp = datetime.now().strftime(SYSLOG_TS_FORMAT)
     log = f"timestamp={timestamp}, status={status}"
     if uuid is not None:
         log +=f", uuid={uuid}"
