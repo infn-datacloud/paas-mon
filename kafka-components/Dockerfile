@@ -26,5 +26,3 @@ RUN pip install --user --upgrade pip \
 COPY ./kafka-components/src /kafka-components/
 
 WORKDIR /kafka-components
-
-RUN chmod +x /kafka-components/*.py
