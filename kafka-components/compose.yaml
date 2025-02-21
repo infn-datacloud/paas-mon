@@ -27,8 +27,8 @@ services:
     image: paas-python:1
     command: python3 /kafka-components/training-processor.py
     environment:
-      KAFKA_ORC_LOG_TOPIC: orchestrator-logs
-      KAFKA_AI_INFER_TOPIC: ai-ranker-inference
-      KAFKA_AI_TRAIN_TOPIC: ai-ranker-training
-      KAFKA_LOG_TOPIC: logs-training-processor
-      KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
+      TRAIN_PROC_KAFKA_ORC_LOG_TOPIC: orchestrator-logs
+      TRAIN_PROC_KAFKA_AI_INFER_TOPIC: ai-ranker-inference
+      TRAIN_PROC_KAFKA_AI_TRAIN_TOPIC: ai-ranker-training
+      TRAIN_PROC_KAFKA_LOG_TOPIC: logs-training-processor
+      TRAIN_PROC_KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
