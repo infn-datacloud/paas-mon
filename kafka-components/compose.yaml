@@ -2,7 +2,7 @@
 services:
   template-parser:
     container_name: template-parser
-    image: paas-python:1
+    image: harbor.cloud.infn.it/datacloud-middleware/paas-mon:jenkins-docker
     command: python3 /kafka-components/template-parser.py
     environment:
       TEMPLATE_PARSER_KAFKA_LOG_ORCHESTRATOR_TOPIC: orchestrator-logs
@@ -12,7 +12,7 @@ services:
     
   infer-preprocessor:
     container_name: infer-preprocessor 
-    image: paas-python:1
+    image: harbor.cloud.infn.it/datacloud-middleware/paas-mon:jenkins-docker
     command: python3 /kafka-components/inference-processor.py
     environment:
       INFER_PROC_KAFKA_VAL_TEMPL_TOPIC: validated-templates
@@ -24,11 +24,11 @@ services:
 
   training-preprocessor:
     container_name: training-preprocessor 
-    image: paas-python:1
+    image: harbor.cloud.infn.it/datacloud-middleware/paas-mon:jenkins-docker
     command: python3 /kafka-components/training-processor.py
     environment:
-      KAFKA_ORC_LOG_TOPIC: orchestrator-logs
-      KAFKA_AI_INFER_TOPIC: ai-ranker-inference
-      KAFKA_AI_TRAIN_TOPIC: ai-ranker-training
-      KAFKA_LOG_TOPIC: logs-training-processor
-      KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
+      TRAIN_PROC_KAFKA_ORC_LOG_TOPIC: orchestrator-logs
+      TRAIN_PROC_KAFKA_AI_INFER_TOPIC: ai-ranker-inference
+      TRAIN_PROC_KAFKA_AI_TRAIN_TOPIC: ai-ranker-training
+      TRAIN_PROC_KAFKA_LOG_TOPIC: logs-training-processor
+      TRAIN_PROC_KAFKA_BOOTSTRAP_SERVERS: 192.168.21.96:9092
