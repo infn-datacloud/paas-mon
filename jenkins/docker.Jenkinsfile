@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         PROJECT_NAME = 'paas-mon'
-        DOCKERFILE = './Dockerfile'
+        DOCKERFILE = './kafka-components/Dockerfile'
 
         DOCKER_HUB_CREDENTIALS_NAME = 'docker-hub-credentials'
         DOCKER_HUB_CREDENTIALS = credentials("${DOCKER_HUB_CREDENTIALS_NAME}")
