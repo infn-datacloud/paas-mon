@@ -158,7 +158,7 @@ def update_completed_event(msg):
         if depl_status[uuid][tpc.INT_STATUS] == tpc.STATUS_SUBMITTED:
             depl_status[uuid][tpc.INT_STATUS] = tpc.STATUS_COMPLETED
             depl_status[uuid][tpc.INT_COMPL_TIME] = get_interval_s(depl_status[uuid][tpc.INT_CREATION_DATE],
-                                                               msg_data[tpc.INT_TIMESTAMP])
+                                                                   msg_data[tpc.INT_TIMESTAMP])
             # Trasmetti le informazioni riguardo il deployment completato
             # dato che non ce ne saranno piu' sullo stesso provider_id
             record_dep_status(depl_status[uuid])

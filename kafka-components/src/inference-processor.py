@@ -8,7 +8,11 @@ from modules import kafka_module as km
 from modules import infer_processor as ip
 from modules import infer_processor_conf as ipc
 from time import time
- 
+
+## TODO
+# Gestire situazione in cui non ha informazioni di rally e/o feeder
+# in tal caso non deve mandare il messaggio e attendere
+
 # Kafka parameteres
 val_templ_topic =    os.environ.get(ipc.KAFKA_VAL_TEMPL_TOPIC,   
                                     ipc.KAFKA_VAL_TEMPL_TOPIC_DEFAULT)

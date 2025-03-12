@@ -30,9 +30,8 @@ INT_PROV_ID = [
 ]
 
 STATUS_SUBMITTED = 'SUBMISSION_EVENT'
-STATUS_COMPLETED = 'SUCCESSFUL_EVENT'
-STATUS_FAILED    =      'ERROR_EVENT'
-
+STATUS_COMPLETED = 'CREATE_COMPLETE'
+STATUS_FAILED    = 'CREATE_FAILED'
 
 ARI_PROVIDERS   = 'providers'
 ARI_PROV_NAME   = 'provider_name'
@@ -55,8 +54,8 @@ ARI_FIELD_TO_KEY = [
 ]
 
 ART_COMPL_TIME = 'completetion_time_s'
-ART_CREATION_DATE = 'creation_date'
-ART_N_FAILURE = 'n_failure'
+ART_CREATION_DATE = 'submission_time'
+ART_N_FAILURE = 'n_failures'
 ART_STATUS = 'status'
 ART_STATUS_REASON = 'status_reason'
 ART_TOT_FAILURE_TIME = 'tot_failure_time_s'

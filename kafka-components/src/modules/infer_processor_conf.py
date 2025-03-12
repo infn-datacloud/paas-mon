@@ -160,10 +160,10 @@ DD_AGGR_KEYS = (*DD_FLAVOR_KEYS,
 DD_STORAGE_SEC_KEYS = (DD_STORAGE_KEY, 
                        DD_VOLUMES_KEY)
 
-DD_KEYS_TO_IMPORT = [DD_TEMPLATE_NAME_KEY, 
-                     DD_TIMESTAMP_KEY, 
-                     DD_USER_GROUP_KEY, 
-                     DD_UUID_KEY]
+# DD_KEYS_TO_IMPORT = [DD_TEMPLATE_NAME_KEY, 
+#                      DD_TIMESTAMP_KEY, 
+#                      DD_USER_GROUP_KEY, 
+#                      DD_UUID_KEY]
 
 # OUTPUT MESSAGE CONSTANTS (O prefix)
 O_PROVIDERS_KEY = 'providers'
@@ -171,6 +171,10 @@ O_PROVIDER_NAME_KEY = 'provider_name'
 O_REGION_NAME_KEY = 'region_name'
 O_IMAGES_KEY = 'images'
 O_TEST_FAILURE_PERC = 'test_failure_perc'
+O_TIMESTAMP = 'submission_time'
+O_TEMPLATE_NAME = 'template_name'
+O_USER_GROUP_KEY = 'user_group'
+O_UUID_KEY = 'uuid'
 O_OVERBOOKING_CPU = "overbooking_cpu"
 O_OVERBOOKING_RAM = "overbooking_ram"
 O_BANDWITDH_IN = "bandwidth_in"
@@ -179,6 +183,11 @@ O_MSG_VERSION = 'msg_version'
 O_MSG_VERSION_VALUE = '1.1.0'
 
 # MISCELLANEOUS
+O_DD_KEYS_TO_IMPORT = [(O_TEMPLATE_NAME, DD_TEMPLATE_NAME_KEY), 
+                       (O_TIMESTAMP, DD_TIMESTAMP_KEY),  
+                       (O_USER_GROUP_KEY,DD_USER_GROUP_KEY),
+                       (O_UUID_KEY, DD_UUID_KEY)]
+
 M_QUOTAS_KEYS = {
     PD_NETWORK_SERVICES_KEY:       [(DD_FLOATINGIPS_KEY, PD_PUBLIC_IPS_KEY,     1)],
     PD_COMPUTE_SERVICES_KEY:       [(DD_VCPUS_KEY,       PD_CORES_KEY,          1),
