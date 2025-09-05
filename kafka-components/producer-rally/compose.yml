@@ -1,0 +1,13 @@
+services:
+  prod-rsyslog:
+    image: paas-mon:base
+    container_name: prod-rally
+    command: "python3 /app/app.py"
+    volumes:
+      - type: bind
+        source: "/home/vino/producer-rally"
+        target: "/app"
+      - type: bind
+        source: "/home/vino/rally/reports/"
+        target: "/data"
+      
