@@ -1,0 +1,47 @@
+services:
+  proc-template-parser:
+    image: paas-mon:base
+    container_name: proc-template-parser
+    command: "python3 /app/template-parser.py"
+    volumes:
+      - type: bind
+        source: "/data/kafka/kafka-components/processors"
+        target: "/app"
+    environment:
+      - LOG_DIR=/app/logs
+      - KAFKA_VALUE_DESERIALIZER_STR=string
+      - KAFKA_SSL_CAFILE=/app/certs/ca_cert.pem
+      - KAFKA_SSL_CERTFILE=/app/certs/proc_template_parser_cert_signed.pem
+      - KAFKA_SSL_KEYFILE=/app/certs/proc_template_parser_key.pem
+      - KAFKA_SSL_PASSWORD_PATH=/app/certs/proc_template_parser.password
+
+  proc-provider-selector:
+    image: paas-mon:base
+    container_name: proc-provider-selector
+    command: "python3 /app/provider-selector.py"
+    volumes:
+      - type: bind
+        source: "/data/kafka/kafka-components/processors"
+        target: "/app"
+    environment:
+      - LOG_DIR=/app/logs
+      - KAFKA_SSL_CAFILE=/app/certs/ca_cert.pem
+      - KAFKA_SSL_CERTFILE=/app/certs/proc_provider_selector_cert_signed.pem
+      - KAFKA_SSL_KEYFILE=/app/certs/proc_provider_selector_key.pem
+      - KAFKA_SSL_PASSWORD_PATH=/app/certs/proc_provider_selector.password
+
+  proc-dataset-collector:
+    image: paas-mon:base
+    container_name: proc-dataset-collector
+    command: "python3 /app/dataset-collector.py"
+    volumes:
+      - type: bind
+        source: "/data/kafka/kafka-components/processors"
+        target: "/app"
+    environment:
+      - LOG_DIR=/app/logs
+      - KAFKA_VALUE_DESERIALIZER_STR=string
+      - KAFKA_SSL_CAFILE=/app/certs/ca_cert.pem
+      - KAFKA_SSL_CERTFILE=/app/certs/proc_dataset_collector_cert_signed.pem
+      - KAFKA_SSL_KEYFILE=/app/certs/proc_dataset_collector_key.pem
+      - KAFKA_SSL_PASSWORD_PATH=/app/certs/proc_dataset_collector.password
