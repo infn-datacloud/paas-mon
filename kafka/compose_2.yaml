@@ -1,0 +1,63 @@
+services:
+  kafka-broker:
+    image: apache/kafka:latest
+    container_name: kafka-broker
+    environment:
+      CLUSTER_ID: 'XXXXXXX'
+      KAFKA_HEAP_OPTS: "-Xms4G -Xmx6G"
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL_LOCALHOST://kafka-broker:9092,BROKER://paas-kafka02-pre:9094,EXTERNAL://paas-kafka02-pre:9095
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@paas-kafka01-pre:9093,2@paas-kafka02-pre:9093,3@paas-kafka03-pre:9093
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_INTER_BROKER_LISTENER_NAME: BROKER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:SSL,INTERNAL_LOCALHOST:PLAINTEXT,BROKER:SSL,EXTERNAL:SSL
+      KAFKA_LISTENERS: INTERNAL_LOCALHOST://:9092,CONTROLLER://:9093,BROKER://:9094,EXTERNAL://:9095
+      KAFKA_LOG_DIRS: '/kafka/logs'
+      KAFKA_NODE_ID: 2
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_REPLICA_FETCH_MAX_BYTES: 10485760 # 10MB
+      KAFKA_REPLICA_FETCH_RESPONSE_MAX_BYTES: 104857600 # 100MB
+      KAFKA_SOCKET_REQUEST_MAX_BYTES: 1000012000
+
+      ## Topic defaults
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: False
+      KAFKA_DEFAULT_REPLICATION_FACTOR: 3
+      KAFKA_DELETE_TOPIC_ENABLE: True 
+      KAFKA_LOG_RETENTION_HOURS: 10000 # 1000=41DAYS, 10000=13.7Months
+      KAFKA_MESSAGE_MAX_BYTES: 104857600 # 100MB
+      KAFKA_MIN_INSYNC_REPLICAS: 2
+      KAFKA_NUM_PARTITION: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 2 
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 3 
+
+      ## Authentication and message encryption
+      KAFKA_SSL_CLIENT_AUTH: 'required'
+      KAFKA_SSL_ENDPOINT_IDENTIFICATION_ALGORITHM: ''
+      KAFKA_SSL_KEY_PASSWORD: 'XXXXXXX'
+      KAFKA_SSL_KEYSTORE_LOCATION: '/kafka/certs/broker.keystore.jks'
+      KAFKA_SSL_KEYSTORE_PASSWORD: 'XXXXXXX'
+      KAFKA_SSL_KEYSTORE_TYPE: JKS
+      KAFKA_SSL_TRUSTSTORE_LOCATION: '/kafka/certs/broker.truststore.jks'
+      KAFKA_SSL_TRUSTSTORE_PASSWORD: 'XXXXXXX'
+      KAFKA_SSL_TRUSTSTORE_TYPE: JKS
+      
+      ## Authorizer
+      KAFKA_ALLOW_EVERYONE_IF_NO_ACL_FOUND: 'False'  
+      KAFKA_AUTHORIZER_CLASS_NAME: 'org.apache.kafka.metadata.authorizer.StandardAuthorizer'
+      KAFKA_SUPER_USERS: 'XXXXXXX'
+
+    ports:
+      - "9093:9093"
+      - "9094:9094"
+      - "9095:9095"
+    volumes:
+      - /data/kafka:/kafka
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "./opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1",
+        ]
+      interval: 10s
+      timeout: 10s
+      retries: 10
