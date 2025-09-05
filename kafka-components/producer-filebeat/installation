@@ -1,0 +1,5 @@
+# VM Orchestrator
+
+curl -L -O https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-9.0.0-amd64.deb
+sudo dpkg -i filebeat-9.0.0-amd64.deb
+rm -f filebeat-9.0.0-amd64.deb

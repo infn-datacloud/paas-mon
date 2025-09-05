@@ -1,0 +1,23 @@
+#  /etc/filebeat/filebeat.yml
+
+# ============================== Filebeat inputs ===============================
+
+filebeat.inputs:
+- type: filestream
+  id: orchestrator-log-filebeat
+  enabled: true
+  paths:
+    - /var/log/syslog
+  include_lines: ['paas-orchestrator-pre\ orchestrator\/']
+
+# ================================== Outputs ===================================
+
+output.kafka:
+  hosts: ["paas-kafka01-pre:9095", "paas-kafka02-pre:9095", "paas-kafka03-pre:9095"]
+  topic: 'orchestrator-logs'
+  required_acks: 1
+  max_message_bytes: 1000000000
+  ssl.certificate_authorities: ["/etc/filebeat/ca.pem"]
+  ssl.certificate: "/etc/filebeat/cert.pem"
+  ssl.key: "/etc/filebeat/cert.key"
+  ssl.key_passphrase: "<to-insert>"
