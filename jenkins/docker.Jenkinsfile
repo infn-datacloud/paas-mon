@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         PROJECT_NAME = 'paas-mon'
-        DOCKERFILE = './kafka-components/Dockerfile'
+        DOCKERFILE = './Dockerfile'
     }
 
     triggers {
