@@ -20,8 +20,8 @@ FROM python:${PYTHON_VERSION}-slim AS production
 COPY --from=requirements /tmp/requirements.txt /requirements.txt
 
 # Upgrade pip and install requirements
-RUN pip install --user --upgrade pip \
-    && pip install --user --no-cache-dir --upgrade -r /requirements.txt
+RUN pip install --user --upgrade pip && \
+    pip install --user --no-cache-dir --upgrade -r /requirements.txt
 
 COPY ./kafka-components/src /kafka-components/
 
