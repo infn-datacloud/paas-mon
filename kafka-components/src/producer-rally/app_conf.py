@@ -30,7 +30,7 @@ def conf_init_logger():
     return logger
 
 class Defaults:
-    APP_DIR_BASE = "/app"
+    APP_DIR_BASE = "/kafka-components/producer-rally"
     APP_NAME = "prod-rally"
     DATA_DIR = "/data"
     KAFKA_ACK = "all"
