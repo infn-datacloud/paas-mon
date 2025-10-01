@@ -35,7 +35,7 @@ class Defaults:
     DATA_DIR = "/data"
     KAFKA_ACK = "all"
     KAFKA_ALLOW_AUTO_CREATE_TOPICS = False
-    KAFKA_CLUSTER = 'paas-kafka01-pre:9095,paas-kafka02-pre:9095,paas-kafka03-pre:9095'
+    KAFKA_CLUSTER = 'kafka01:9095,kafka02:9095,kafka03:9095'
     KAFKA_CONSUMER_TIMEOUT_MS = 1000
     KAFKA_INPUT_TOPICS = 'rally'
     KAFLA_MAX_REQUEST_SIZE = 104857600
