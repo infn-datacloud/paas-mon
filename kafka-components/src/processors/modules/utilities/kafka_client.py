@@ -7,7 +7,7 @@ from logging import Formatter as logging_Formatter
 import random
 import string
 from kafka import KafkaConsumer, KafkaProducer # type: ignore
-from modules.kafka_logging_handler import KafkaLoggingHandler
+from modules.utilities.kafka_logging_handler import KafkaLoggingHandler
 
 class KafkaClient():
     PROD_DEFAULT_CONFIG = {
