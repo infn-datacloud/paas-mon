@@ -55,7 +55,7 @@ logger.info("Starting to consume messages from orchestrator-logs topic")
 collect_template = False
 str_template = []
 
-orc_templ_collector = LogOrchestratorCollector(logger)
+orc_templ_collector = LogOrchestratorCollector(settings, logger)
 
 def monitoring_task():
     while True:

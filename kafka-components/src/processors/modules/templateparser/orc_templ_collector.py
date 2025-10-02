@@ -16,24 +16,30 @@ class LogOrchestratorCollector:
     EVENT_TEMPLATE_STRING = " i.r.o.service.DeploymentServiceImpl      : {"
     
     INFO_TEMPLATE_STRING = "{\"uuid\""  # JSON string containing the UUID   
-    LOG_SEP = "]: "  # Separator for log lines
+    # LOG_SEP = "]: "  # Separator for log lines 
     TS_FORMAT = "%Y-%m-%d %H:%M:%S.%f"  # Format for syslog timestamp
     SYSLOG_TS_FORMAT = "%Y-%m-%dT%H:%M:%S%z"  # Format for syslog timestamp
     LOG_FILTER = " paas-orchestrator-pre orchestrator/"  # Filter for log lines to reject
     
     LOG_INPUT_FORMAT = "%b %d %H:%M:%S %Y"
     LOG_LOCAL_TIMEZONE = pytz.timezone("Europe/Rome")
-    LOG_SEP = 'paas-orchestrator-pre orchestrator/'
-    
+    LOG_SEP_DEFAULT = 'paas-orchestrator-pre orchestrator/'
+    LOG_SEP_KEY = "log_sep"
     KEY_TIMESTAMP = 'timestamp'
     
-    def __init__(self, logger):
+    def __init__(self, settings, logger):
         self.collect = False  # Flag to indicate if template collection is in progress
         self.str_template = []  # List to collect template lines
         self.logger = logger  # Logger instance for logging messages
         self.collect_template = False  # Flag to indicate if template collection is in progress
         self.str_template = []
         self.received_user_parameters = False  # Flag to indicate if user parameters have been received
+        
+        if hasattr(settings, self.LOG_SEP_KEY):
+            self.LOG_SEP = settings.LOG_SEP
+        else:
+            self.LOG_SEP = self.LOG_SEP_DEFAULT
+        self.logger.info(f"Using log separator: {self.LOG_SEP}")
     
     # Parse timestamp
     def extract_timestamp(self, line) -> tuple[datetime, datetime]:
