@@ -208,6 +208,8 @@ class LogOrchestratorCollector:
         self.logger.info(f"{current_year=}")
         log_timestamp_str = ' '.join(log.split()[0:3])
         self.logger.info(f"{log_timestamp_str=}")
+        self.logger.info(f"{len(log.split(self.LOG_SEP))}")
+        self.logger.info(f"{log.split(self.LOG_SEP)}")
         log_value = self.LOG_SEP + log.split(self.LOG_SEP)[1]
         self.logger.info(f"{log_value=}")
         full_timestamp_str = f"{log_timestamp_str} {current_year}"
