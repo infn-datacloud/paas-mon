@@ -21,6 +21,9 @@ class ProviderSelectorConfig(BaseSettings):
     KAFKA_AUTO_OFFSET_RESET: str = Field(default = 'earliest',
                                           env="KAFKA_AUTO_OFFSET_RESET",
                                           description="Auto offset reset policy for Kafka consumer")
+    KAFKA_BOOTSTRAP_SERVERS: str = Field(default = 'kafka-1:9095,kafka-2:9095,kafka-3:9095',
+                                          env="KAFKA_BOOTSTRAP_SERVERS",
+                                          description="Bootstrap servers for Kafka cluster")
     KAFKA_CLIENT_ID: str = Field(default = "prod-provider-selector",
                                             env="KAFKA_CLIENT_ID",
                                             description="Client ID for Kafka producer/consumer")
