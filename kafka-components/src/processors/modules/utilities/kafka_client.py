@@ -13,7 +13,7 @@ class KafkaClient():
     PROD_DEFAULT_CONFIG = {
         'acks': 'all',
         'allow_auto_create_topics': False,
-        'bootstrap_servers': 'paas-kafka01-pre:9095,paas-kafka02-pre:9095,paas-kafka03-pre:9095',
+        'bootstrap_servers': 'kafka-1:9092,kafka-2:9092,kafka-3:9092',
         'client_id': None,
         'enable_idempotence': True,
         'max_request_size': 104857600,
@@ -28,7 +28,7 @@ class KafkaClient():
     
     CONS_DEFAULT_CONFIG = {
         'auto_offset_reset': 'earliest', 
-        'bootstrap_servers': 'paas-kafka01-pre:9095,paas-kafka02-pre:9095,paas-kafka03-pre:9095',
+        'bootstrap_servers': 'kafka-1:9092,kafka-2:9092,kafka-3:9092',
         'client_id': None, 
         'enable_auto_commit': True,
         'fetch_max_bytes': 104857600, 
@@ -57,6 +57,7 @@ class KafkaClient():
         for key in self.client_configs:
             if key in configs:
                 self.client_configs[key] = configs[key]
+                print(f"Set client config {key} = {configs[key]}")
         
         ssl_password = None
         if 'ssl_password_path' in configs:
