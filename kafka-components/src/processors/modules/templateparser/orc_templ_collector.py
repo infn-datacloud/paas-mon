@@ -23,7 +23,7 @@ class LogOrchestratorCollector:
     
     LOG_INPUT_FORMAT = "%b %d %H:%M:%S %Y"
     LOG_LOCAL_TIMEZONE = pytz.timezone("Europe/Rome")
-    LOG_SEP_DEFAULT = 'paas-orchestrator-pre orchestrator/'
+    LOG_SEP_DEFAULT = 'paas-orchestrator orchestrator/'
     LOG_SEP_KEY = "log_sep"
     KEY_TIMESTAMP = 'timestamp'
     
@@ -34,6 +34,8 @@ class LogOrchestratorCollector:
         self.collect_template = False  # Flag to indicate if template collection is in progress
         self.str_template = []
         self.received_user_parameters = False  # Flag to indicate if user parameters have been received
+        
+        self.logger.info(f"{settings.keys()}")
         
         if hasattr(settings, self.LOG_SEP_KEY):
             self.LOG_SEP = settings.LOG_SEP
