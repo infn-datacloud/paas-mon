@@ -19,7 +19,7 @@ class LogOrchestratorCollector:
     # LOG_SEP = "]: "  # Separator for log lines 
     TS_FORMAT = "%Y-%m-%d %H:%M:%S.%f"  # Format for syslog timestamp
     SYSLOG_TS_FORMAT = "%Y-%m-%dT%H:%M:%S%z"  # Format for syslog timestamp
-    LOG_FILTER = " paas-orchestrator-pre orchestrator/"  # Filter for log lines to reject
+    LOG_FILTER = " paas-orchestrator orchestrator/"  # Filter for log lines to reject
     
     LOG_INPUT_FORMAT = "%b %d %H:%M:%S %Y"
     LOG_LOCAL_TIMEZONE = pytz.timezone("Europe/Rome")
