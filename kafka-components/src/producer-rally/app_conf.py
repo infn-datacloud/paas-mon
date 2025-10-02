@@ -3,8 +3,8 @@ import os
 import logging
 logger = logging.getLogger(__name__)
 
-def conf_logger(app_dir_base, app_name):
-    log_filename = f"{app_dir_base}/{app_name}.log"
+def conf_logger(log_dir, app_name):
+    log_filename = f"{log_dir}/{app_name}.log"
     logger = logging.getLogger(app_name)
     formatter_str = '%(asctime)s [%(name)-12s] %(levelname)s %(message)s'
     formatter = logging.Formatter(formatter_str)
@@ -44,6 +44,7 @@ class Defaults:
     KAFKA_SSL_CERT_PATH = f'{APP_DIR_BASE}/certs/prod_rally_cert_signed.pem'
     KAFLA_SSL_KEY_PATH = f'{APP_DIR_BASE}/certs/prod_rally_key.pem'
     KAFKA_OUTPUT_TOPIC = 'rally'
+    LOG_DIR = f'{APP_DIR_BASE}/logs'
 
 class EnvVars:
     APP_DIR_BASE = "APP_DIR_BASE"
@@ -61,6 +62,7 @@ class EnvVars:
     KAFKA_SSL_CERT_PATH = 'KAFKA_SSL_CERT_PATH'
     KAFLA_SSL_KEY_PATH = 'KAFLA_SSL_KEY_PATH'
     KAFKA_OUTPUT_TOPIC = 'KAFKA_OUTPUT_TOPIC'
+    LOG_DIR = 'LOG_DIR'
 
 class Configuration:
     def __init__(self):
@@ -86,7 +88,13 @@ class Configuration:
             param_type=str
         )
         
-        self.logger = conf_logger(self.app_dir_base, 
+        self.log_dir = self._load_param(
+            env_var_name=EnvVars.LOG_DIR,
+            default_value=Defaults.LOG_DIR,
+            param_type=str
+        )
+        
+        self.logger = conf_logger(self.log_dir, 
                                   self.app_name)
         
         self.kafka_ack = self._load_param(
@@ -147,6 +155,9 @@ class Configuration:
             default_value=Defaults.KAFKA_OUTPUT_TOPIC,
             param_type=str
         )
+        
+        
+        
         self.logger.info("END Configuration collecting.")
         # self.logger.info(f"Loaded Parameters: {self.__dict__}")
 
