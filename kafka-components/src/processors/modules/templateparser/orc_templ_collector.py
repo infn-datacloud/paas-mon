@@ -199,14 +199,23 @@ class LogOrchestratorCollector:
             str: The converted log message in ISO 8601 format.
         """
         current_year = datetime.now().year
+        self.logger.info(f"{current_year=}")
         log_timestamp_str = ' '.join(log.split()[0:3])
+        self.logger.info(f"{log_timestamp_str=}")
         log_value = self.LOG_SEP + log.split(self.LOG_SEP)[1]
+        self.logger.info(f"{log_value=}")
         full_timestamp_str = f"{log_timestamp_str} {current_year}"
+        self.logger.info(f"{full_timestamp_str=}")
         dt_object = datetime.strptime(full_timestamp_str, self.LOG_INPUT_FORMAT)
+        self.logger.info(f"{dt_object=}")
         localized_dt_object = self.LOG_LOCAL_TIMEZONE.localize(dt_object, is_dst=None)
+        self.logger.info(f"{localized_dt_object=}")
         utc_dt_object = localized_dt_object.astimezone(pytz.utc)
+        self.logger.info(f"{utc_dt_object=}")
         iso_format = utc_dt_object.strftime(self.SYSLOG_TS_FORMAT)
+        self.logger.info(f"{iso_format=}")
         new_log_format = f"{iso_format[:-2]}:{iso_format[-2:]} {log_value}"
+        self.logger.info(f"{new_log_format=}")
         return new_log_format
 
     def import_line(self, line: str) -> bool:

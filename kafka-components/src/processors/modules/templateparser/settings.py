@@ -39,9 +39,12 @@ class TemplateParserConfig(BaseSettings):
     KAFKA_GROUP_ID_BASE : str = Field(default = "prod-template-parser-group-id",
                                            env="KAFKA_GROUP_ID",
                                            description="Consumer group ID for Kafka consumer")
-    KAFKA_INPUT_TOPICS: list[str] = Field(default = ["orchestrator-logs"],
+    KAFKA_INPUT_TOPICS: list[str] = Field(default = [],
                                            env="KAFKA_INPUT_TOPICS",
                                            description="List of input Kafka topics")
+    KAFKA_INPUT_TOPIC: str = Field(default = "orchestrator-logs",
+                                   env="KAFKA_INPUT_TOPIC",
+                                   description="List of input Kafka topics")
     KAFKA_MAX_POLL_RECORDS: int = Field(default = 1,
                                          env="KAFKA_MAX_POLL_RECORDS",
                                          description="Maximum number of records to return in a single poll for Kafka consumer")
@@ -105,4 +108,6 @@ class TemplateParserConfig(BaseSettings):
             if key.startswith('kafka_'):
                 key = key.replace('kafka_', '')
             settings_dict[key] = value
+        
+        settings_dict['input_topics'] = [self.settings.KAFKA_INPUT_TOPIC]
         return settings_dict
