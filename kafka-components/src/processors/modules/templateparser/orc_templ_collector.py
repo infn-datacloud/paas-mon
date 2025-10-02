@@ -41,7 +41,10 @@ class LogOrchestratorCollector:
             self.LOG_SEP = settings.LOG_SEP
         else:
             self.LOG_SEP = self.LOG_SEP_DEFAULT
+        self.LOG_FILTER = self.LOG_SEP
         self.logger.info(f"Using log separator: {self.LOG_SEP}")
+        
+        
     
     # Parse timestamp
     def extract_timestamp(self, line) -> tuple[datetime, datetime]:
