@@ -109,5 +109,7 @@ class TemplateParserConfig(BaseSettings):
                 key = key.replace('kafka_', '')
             settings_dict[key] = value
         
-        settings_dict['input_topics'] = [self.settings.KAFKA_INPUT_TOPIC]
+        settings_dict['input_topics'] = [settings_dict['input_topic']]
         return settings_dict
+    
+    
