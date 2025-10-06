@@ -23,7 +23,7 @@ RALLY_PROVIDER_NAME_MAPPING = {
     'CLOUD-CNAF-T1-tier1': 'cloud_cnaf_t1',
     'CLOUD-INFN-CATANIA-INFN-CT': 'cloud_ct' ,
     'RECAS-BARI-RegionOne': 'recas_bari',
-    "CLOUD_VENETOXXXXXX": 'cloud_veneto',
+    "CLOUD-VENETO-regionOne": 'cloud_veneto',
     "CLOUD_NAPOLIXXXXXX": 'cloud_na'
 }
 

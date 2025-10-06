@@ -57,8 +57,6 @@ class ProviderSelectorProcessor:
                 
             # Collect messages from rally topic and aggregate them
             if topic == self.settings.KAFKA_INPUT_RALLY_TOPIC:
-                self.logger.debug(f"{messages[0]}")
-                self.logger.debug(f"{type(messages[0].value)}")
                 msgs = [ msg.value for msg in messages if isinstance(msg.value, dict) ]
                 self.rally_data.import_multiple_messages(msgs)
                 self.logger.debug(f"Imported {self.rally_data.size()} rally messages from topic {self.settings.KAFKA_INPUT_RALLY_TOPIC}")
@@ -326,7 +324,6 @@ class ProviderSelectorProcessor:
                     p_info[k] = float(v)
             m[ipc.O_PROVIDERS_KEY].append(p_info)
         return m
-
 
     def process_new_messages(self):
         for message in self.kafka_client.consumer:
