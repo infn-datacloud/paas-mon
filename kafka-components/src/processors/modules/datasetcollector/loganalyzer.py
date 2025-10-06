@@ -59,7 +59,7 @@ class LogAnalyzer:
             self.ORCLOG_ORCHESTARTOR_TAG = settings.LOG_SEP
         else:
             self.ORCLOG_ORCHESTARTOR_TAG = self.LOG_SEP_DEFAULT
-        self.logger.info(f"Using log separator: {self.LOG_SEP}")
+        self.logger.info(f"Using log separator: {self.ORCLOG_ORCHESTARTOR_TAG}")
         
     def is_line_to_reject(self, line):
         msg = line[self.LINE_MESSAGE]
