@@ -18,7 +18,7 @@ class DatasetCollectorProcessor:
         self.settings.KAFKA_INPUT_TOPICS = [self.settings.KAFKA_INPUT_ORC_LOG_TOPIC,
                                             self.settings.KAFKA_INPUT_PROVIDERS_TO_RANK_TOPIC]
         # Internal objects
-        self.log_analyzer = LogAnalyzer(logger)
+        self.log_analyzer = LogAnalyzer(logger, settings.get_values())
         self.kafka_client = KafkaClient(logger, **settings.get_values())
         self.providers = Providers(logger)
         

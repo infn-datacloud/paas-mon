@@ -6,7 +6,9 @@ class LogAnalyzer:
     ORCLOG_SUBMISSION_LINE    = "Submission of deployment request to the IM. "
     ORCLOG_COMPLETED_LINE     = "Deployment completed successfully. "
     ORCLOG_ERROR_LINE         = "Deployment in error. "
-    ORCLOG_ORCHESTARTOR_TAG   = " paas-orchestrator-pre orchestrator/"
+    # ORCLOG_ORCHESTARTOR_TAG   = " paas-orchestrator-pre orchestrator/"
+    LOG_SEP_DEFAULT = 'paas-orchestrator orchestrator/'
+    LOG_SEP_KEY = "log_sep"
     ORCLOG_ERROR_SUMMARY_LINE = " Retries on cloud providers exhausted."
     ORCLOG_SYSLOG_TS_FORMAT   = "%Y-%m-%dT%H:%M:%S%z" # YYYY-MM-DD HH:MM:SS+ZZ:ZZ
     ORCLOG_FILEBEAT_TS_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ" 
@@ -44,13 +46,20 @@ class LogAnalyzer:
     STATUS_COMPLETED = 'CREATE_COMPLETE'
     STATUS_FAILED    = 'CREATE_FAILED'
 
-    def __init__(self, logger = None):
+    def __init__(self, settings, logger = None):
         self.logger = logger
         self.depl_status = {}
         self.data = {}
         
         # Init Monitoring metrics:
         self.detected_events = 0
+        
+        # Get log separator from settings
+        if hasattr(settings, self.LOG_SEP_KEY):
+            self.ORCLOG_ORCHESTARTOR_TAG = settings.LOG_SEP
+        else:
+            self.ORCLOG_ORCHESTARTOR_TAG = self.LOG_SEP_DEFAULT
+        self.logger.info(f"Using log separator: {self.LOG_SEP}")
         
     def is_line_to_reject(self, line):
         msg = line[self.LINE_MESSAGE]

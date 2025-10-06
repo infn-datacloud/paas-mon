@@ -17,6 +17,9 @@ R_TEST_RESULT_TRUE = 'True'
 R_TEST = False
 
 ## Rally provider name mapping
+## This hard coded mapping should be removed when the providers will use normalized names
+## according to the naming convention defined in the documentation
+## TODO: remove hard coded mapping``
 RALLY_PROVIDER_NAME_MAPPING = {
     'BACKBONE-bari': 'backbone_bari',
     'BACKBONE-cnaf': 'backbone_cnaf',

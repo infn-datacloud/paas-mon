@@ -83,7 +83,9 @@ class DatasetCollectorConfig(BaseSettings):
     MONITORING_PERIOD: int = Field(default = 600, # 10 minutes
                                    env="MONITORING_PERIOD",
                                    description="Monitoring period, in seconds")
-    
+    LOG_SEP: str = Field(default = "paas-orchestrator orchestrator/",
+                                     env="LOG_SEP",
+                                     description="Log separator used in the log parser")
     value_serializer: Callable = None
     value_deserializer: Callable = None
     
