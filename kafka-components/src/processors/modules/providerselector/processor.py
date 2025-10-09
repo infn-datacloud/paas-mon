@@ -108,8 +108,10 @@ class ProviderSelectorProcessor:
         if ipc.VT_OS_KEY in vt_c_obj and \
         ipc.VT_PROP_KEY in vt_c_obj[ipc.VT_OS_KEY]:
             os_obj = vt_c_obj[ipc.VT_OS_KEY][ipc.VT_PROP_KEY]
-            info[ipc.DD_OS_DISTRO_KEY] = str(os_obj[ipc.VT_DISTRIBUTION_KEY])
-            info[ipc.DD_OS_VERSION_KEY] = str(os_obj[ipc.VT_VERSION_KEY])
+            if ipc.VT_DISTRIBUTION_KEY in os_obj:
+                info[ipc.DD_OS_DISTRO_KEY] = str(os_obj[ipc.VT_DISTRIBUTION_KEY])
+            if ipc.VT_VERSION_KEY in os_obj:
+                info[ipc.DD_OS_VERSION_KEY] = str(os_obj[ipc.VT_VERSION_KEY]) ## KeyError: 'version'
         return info
 
     def get_storage_info(self, vt_s_obj: dict) -> dict:
