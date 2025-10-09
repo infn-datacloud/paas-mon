@@ -9,8 +9,8 @@ class DatasetCollectorConfig(BaseSettings):
                           env="APP_NAME",
                           description="Name of the application")
     LOG_DIR: str = Field(default = "./logs",
-                                       env="APP_LOG_DIR",
-                                       description="Directory for application logs")
+                         env="APP_LOG_DIR",
+                         description="Directory for application logs")
     KAFKA_ACKS: str = Field(default = 'all',
                             env="KAFKA_ACKS",
                             description="Acknowledgment setting for Kafka producer")    
@@ -77,15 +77,15 @@ class DatasetCollectorConfig(BaseSettings):
     KAFKA_VALUE_SERIALIZER_STR: str = Field(default = 'json',
                                            env="KAFKA_VALUE_SERIALIZER",
                                            description="Serializer for Kafka message values")
+    LOG_SEP: str = Field(default = "paas-orchestrator orchestrator/",
+                                     env="LOG_SEP",
+                                     description="Log separator used in the log parser")
     MONITORING_ENABLED: bool = Field(default = True,
                                      env="MONITORING_ENABLED",
                                      description="Enable monitoring service")
     MONITORING_PERIOD: int = Field(default = 600, # 10 minutes
                                    env="MONITORING_PERIOD",
                                    description="Monitoring period, in seconds")
-    LOG_SEP: str = Field(default = "paas-orchestrator orchestrator/",
-                                     env="LOG_SEP",
-                                     description="Log separator used in the log parser")
     value_serializer: Callable = None
     value_deserializer: Callable = None
     

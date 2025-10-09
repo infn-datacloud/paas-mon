@@ -7,6 +7,7 @@ from modules.providerselector.rally import Rally
 from modules.providerselector.settings import ProviderSelectorConfig
 from modules.utilities.kafka_client import KafkaClient
 from modules.providerselector import conf as ipc
+import json
 
 class ProviderSelectorProcessor:
     
@@ -175,7 +176,7 @@ class ProviderSelectorProcessor:
                     for q_elem in obj[ipc.PD_QUOTAS_KEY]:
                         for dd_key, pd_key, factor in ipc.M_QUOTAS_KEYS[prov_key]:
                             obj_key = self.create_key(dd_key, q_elem[ipc.PD_USAGE_KEY])
-                            obj_value = int(q_elem[pd_key]/factor)
+                            obj_value = int(q_elem[pd_key]/factor) # TypeError: unsupported operand type(s) for /: 'NoneType' and 'int'
                             quotas[obj_key] = obj_value
         return quotas
 
@@ -329,30 +330,35 @@ class ProviderSelectorProcessor:
 
     def process_new_messages(self):
         for message in self.kafka_client.consumer:
-            topic = str(message.topic)
-            if topic == self.settings.KAFKA_INPUT_RALLY_TOPIC:
-                self.rally_data.import_single_message(message.value)
-            elif topic == self.settings.KAFKA_INPUT_FEDREG_TOPIC:
-                self.fedreg_mon.update_providers_data(message.value)
-            elif topic == self.settings.KAFKA_INPUT_VALTEMPL_TOPIC:
-                dep_data = self.extract_data_from_valid_template(message.value)
-                dep_data = self.best_match_finder(dep_data)
-                n_found_projects = len(dep_data['providers'])
-                if n_found_projects < 1:
-                    self.logger.warning(f"No found any available projects for the deployment with uuid: {dep_data['uuid']}")
-                    continue
-                
-                dep_data = self.remove_null(dep_data)
-                dep_data = self.compute_aggregated_resource(dep_data) 
-                msg = self.get_msg(dep_data)
-                
-                msg_uuid = msg['uuid']
-                if msg_uuid not in self.output_uuids:
-                    self.kafka_client.send(msg)
-                    self.logger.info(f"Template with uuid {msg_uuid} has been processed and sent successfully")
-                    self.output_uuids.add(msg_uuid)
-                    self.msg_sent += 1
-                else:
-                    self.logger.info(f"Template with uuid {msg_uuid} already in the output topic")
+            try:
+                topic = str(message.topic)
+                if topic == self.settings.KAFKA_INPUT_RALLY_TOPIC:
+                    self.rally_data.import_single_message(message.value)
+                elif topic == self.settings.KAFKA_INPUT_FEDREG_TOPIC:
+                    self.fedreg_mon.update_providers_data(message.value)
+                elif topic == self.settings.KAFKA_INPUT_VALTEMPL_TOPIC:
+                    dep_data = self.extract_data_from_valid_template(message.value)
+                    dep_data = self.best_match_finder(dep_data)
+                    n_found_projects = len(dep_data['providers'])
+                    if n_found_projects < 1:
+                        self.logger.warning(f"No found any available projects for the deployment with uuid: {dep_data['uuid']}")
+                        continue
+                    
+                    dep_data = self.remove_null(dep_data)
+                    dep_data = self.compute_aggregated_resource(dep_data) 
+                    msg = self.get_msg(dep_data)
+                    
+                    msg_uuid = msg['uuid']
+                    if msg_uuid not in self.output_uuids:
+                        self.kafka_client.send(msg)
+                        self.logger.info(f"Template with uuid {msg_uuid} has been processed and sent successfully")
+                        self.output_uuids.add(msg_uuid)
+                        self.msg_sent += 1
+                    else:
+                        self.logger.info(f"Template with uuid {msg_uuid} already in the output topic")
+            except Exception as e:
+                self.logger.error(f"Error processing message from topic {topic}: {e}", exc_info=True)
+                self.logger.error(f"Message: {json.dumps(message.value, indent=2)}")
+                continue
                     
                     
