@@ -1,0 +1,25 @@
+services:
+  consumer-file:
+    image: harbor.cloud.infn.it/datacloud-middleware/paas-mon:python3.11
+    container_name: consumer-file
+    command: "python3 /kafka-components/app/consumer-file.py"
+    volumes:
+        - type: bind
+          source: "/data/kafka-components/certs"
+          target: "/kafka-components/certs"
+        - type: bind
+          source: "./logs"
+          target: "/kafka-components/logs"
+        - type: bind
+          source: "/home/vino/paas-mon/kafka-components/src/"
+          target: "/kafka-components/app"
+    environment:
+      APP_NAME: "consumer-file"
+      LOG_DIR: "/kafka-components/logs"
+      KAFKA_BOOTSTRAP_SERVERS: "kafka-1:9095,kafka-2:9095,kafka-3:9095"
+      KAFKA_INPUT_TOPICS: "feeder"
+      KAFKA_SSL_CAFILE: "/kafka-components/certs/ca.pem"
+      KAFKA_SSL_CERTFILE: "/kafka-components/certs/provsel_cert.pem"
+      KAFKA_SSL_KEYFILE: "/kafka-components/certs/provsel_cert.key"
+      KAFKA_SSL_PASSWORD_PATH: "/kafka-components/certs/provsel_cert.passwd"
+      KAFKA_VALUE_DESERIALIZER_STR: "json"
