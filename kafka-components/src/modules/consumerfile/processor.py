@@ -1,6 +1,6 @@
 
 from time import time
-from settings import ConsumerFile as Config
+from modules.consumerfile.settings import ConsumerFile as Config
 from modules.utilities.kafka_client import KafkaClient
 
 class ConsumerFileProcessor:
