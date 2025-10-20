@@ -5,3 +5,7 @@
 # Python Build
 **/__pycache__
 **/*.pyc
+
+# Temporary files
+**/*.json
+**/*.lp
