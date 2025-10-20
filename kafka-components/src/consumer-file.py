@@ -9,8 +9,8 @@
 # output-file:
 #   consumer-file.txt
 
-from processor import ConsumerFileProcessor as Processor
-from settings import ConsumerFile as Config
+from modules.consumerfile.processor import ConsumerFileProcessor as Processor
+from modules.consumerfile.settings import ConsumerFile as Config
 from modules.utilities.logger import create_logger
 
 if __name__ == "__main__": 
