@@ -56,6 +56,9 @@ class ConsumerFile(BaseSettings):
     KAFKA_VALUE_DESERIALIZER_STR: str = Field(default = 'json',
                                            env="KAFKA_VALUE_DESERIALIZER",
                                            description="Deserializer for Kafka message values")
+    KAFKA_VALUE_SERIALIZER_STR: str = Field(default = 'json',
+                                           env="KAFKA_VALUE_SERIALIZER",
+                                           description="Serializer for Kafka message values")
     OUTPUT_FILENAME_BASE: str = Field(default = 'output',
                                       env="OUTPUT_FILENAME",
                                       description="Filename of the output file containing the extracted messages")
