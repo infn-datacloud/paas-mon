@@ -1,0 +1,294 @@
+{
+	"bandwidth_in": 10.0,
+	"bandwidth_out": 10.0,
+	"block_storage_services": [
+		{
+			"description": "",
+			"endpoint": "https://cloud-api-pub.cr.cnaf.infn.it:8776/v3",
+			"name": "org.openstack.cinder",
+			"quotas": [
+				{
+					"description": "",
+					"gigabytes": 500,
+					"per_user": false,
+					"per_volume_gigabytes": -1,
+					"project": "4dd93340f51f4206a8dfd0569d4eb812",
+					"type": "block-storage",
+					"usage": false,
+					"volumes": 50
+				},
+				{
+					"description": "",
+					"gigabytes": 438,
+					"per_user": false,
+					"per_volume_gigabytes": 0,
+					"project": "4dd93340f51f4206a8dfd0569d4eb812",
+					"type": "block-storage",
+					"usage": true,
+					"volumes": 6
+				}
+			],
+			"type": "block-storage"
+		}
+	],
+	"compute_services": [
+		{
+			"description": "",
+			"endpoint": "https://cloud-api-pub.cr.cnaf.infn.it:8774/v2.1",
+			"flavors": [
+				{
+					"description": "",
+					"disk": 40,
+					"ephemeral": 0,
+					"gpu_model": null,
+					"gpu_vendor": null,
+					"gpus": 0,
+					"infiniband": false,
+					"is_shared": true,
+					"local_storage": "false",
+					"name": "m1.medium",
+					"ram": 4096,
+					"swap": 0,
+					"uuid": "1741c1a1-e421-4b79-a0f8-f949aa0df52c",
+					"vcpus": 2
+				},
+				{
+					"description": "",
+					"disk": 80,
+					"ephemeral": 0,
+					"gpu_model": null,
+					"gpu_vendor": null,
+					"gpus": 0,
+					"infiniband": false,
+					"is_shared": true,
+					"local_storage": "false",
+					"name": "m1.large",
+					"ram": 8192,
+					"swap": 0,
+					"uuid": "2b761b77-5b39-40bc-af9e-e13cc4fab5b4",
+					"vcpus": 4
+				},
+				{
+					"description": "",
+					"disk": 20,
+					"ephemeral": 0,
+					"gpu_model": null,
+					"gpu_vendor": null,
+					"gpus": 0,
+					"infiniband": false,
+					"is_shared": true,
+					"local_storage": "false",
+					"name": "m1.small",
+					"ram": 2048,
+					"swap": 0,
+					"uuid": "68544ffa-fb2a-46bf-935a-d657fd2b9b70",
+					"vcpus": 1
+				},
+				{
+					"description": "",
+					"disk": 20,
+					"ephemeral": 0,
+					"gpu_model": null,
+					"gpu_vendor": null,
+					"gpus": 0,
+					"infiniband": false,
+					"is_shared": true,
+					"local_storage": "false",
+					"name": "m1.training",
+					"ram": 4096,
+					"swap": 0,
+					"uuid": "9c0c2e07-9c2e-4daa-ba4e-b3d2d98d462a",
+					"vcpus": 2
+				},
+				{
+					"description": "",
+					"disk": 160,
+					"ephemeral": 0,
+					"gpu_model": null,
+					"gpu_vendor": null,
+					"gpus": 0,
+					"infiniband": false,
+					"is_shared": true,
+					"local_storage": "false",
+					"name": "m1.xlarge",
+					"ram": 16384,
+					"swap": 0,
+					"uuid": "d0bb5938-1f74-4962-b68f-8fc6254a453b",
+					"vcpus": 8
+				},
+				{
+					"description": "",
+					"disk": 10,
+					"ephemeral": 0,
+					"gpu_model": null,
+					"gpu_vendor": null,
+					"gpus": 0,
+					"infiniband": false,
+					"is_shared": true,
+					"local_storage": "false",
+					"name": "m1.tiny",
+					"ram": 512,
+					"swap": 0,
+					"uuid": "e54d4f81-92e2-4ba3-96e6-5c8e49192a9c",
+					"vcpus": 1
+				}
+			],
+			"images": [
+				{
+					"architecture": null,
+					"created_at": "2025-07-17 08:42:59+00:00",
+					"cuda_support": false,
+					"description": "",
+					"gpu_driver": false,
+					"is_shared": true,
+					"kernel_id": null,
+					"name": "almalinux-9-CNAF-x86_64",
+					"os_distro": "almalinux",
+					"os_type": null,
+					"os_version": "9",
+					"tags": [
+						"infn-cloud"
+					],
+					"uuid": "4c3ce0d9-3d8c-411b-8927-97437a54c758"
+				},
+				{
+					"architecture": null,
+					"created_at": "2025-07-17 08:02:41+00:00",
+					"cuda_support": false,
+					"description": "",
+					"gpu_driver": false,
+					"is_shared": true,
+					"kernel_id": null,
+					"name": "debian-12-CNAF-x86_64",
+					"os_distro": "debian",
+					"os_type": null,
+					"os_version": "12",
+					"tags": [
+						"infn-cloud"
+					],
+					"uuid": "5be40c5b-2523-4b25-8c98-9dc2082e76fb"
+				},
+				{
+					"architecture": null,
+					"created_at": "2025-07-16 10:26:41+00:00",
+					"cuda_support": false,
+					"description": "",
+					"gpu_driver": false,
+					"is_shared": true,
+					"kernel_id": null,
+					"name": "ubuntu-jammy-CNAF-x86_64",
+					"os_distro": "ubuntu",
+					"os_type": null,
+					"os_version": "22.04",
+					"tags": [
+						"infn-cloud"
+					],
+					"uuid": "b81e0696-9db4-4052-ae2a-1640be790251"
+				}
+			],
+			"name": "org.openstack.nova",
+			"quotas": [
+				{
+					"cores": 120,
+					"description": "",
+					"instances": 50,
+					"per_user": false,
+					"project": "4dd93340f51f4206a8dfd0569d4eb812",
+					"ram": 204800,
+					"type": "compute",
+					"usage": false
+				},
+				{
+					"cores": 100,
+					"description": "",
+					"instances": 31,
+					"per_user": false,
+					"project": "4dd93340f51f4206a8dfd0569d4eb812",
+					"ram": 204800,
+					"type": "compute",
+					"usage": true
+				}
+			],
+			"type": "compute"
+		}
+	],
+	"identity_endpoint": "https://cloud-api-pub.cr.cnaf.infn.it:5000/v3",
+	"issuer_endpoint": "https://iam.cloud.infn.it/",
+	"issuer_name": "infn-cc",
+	"issuer_protocol": "openid",
+	"msg_version": "1.3.0",
+	"network_services": [
+		{
+			"description": "",
+			"endpoint": "https://cloud-api-pub.cr.cnaf.infn.it:9696/v2.0",
+			"name": "org.openstack.neutron",
+			"networks": [
+				{
+					"description": "",
+					"is_default": true,
+					"is_router_external": true,
+					"is_shared": false,
+					"mtu": 1500,
+					"name": "public-gp",
+					"projects": [
+						"4dd93340f51f4206a8dfd0569d4eb812"
+					],
+					"proxy_host": null,
+					"proxy_user": null,
+					"tags": [],
+					"uuid": "5bf80ea7-9308-42fc-94e4-efdabc113dae"
+				},
+				{
+					"description": "",
+					"is_default": true,
+					"is_router_external": false,
+					"is_shared": false,
+					"mtu": 1500,
+					"name": "infn-cloud-net",
+					"projects": [
+						"4dd93340f51f4206a8dfd0569d4eb812"
+					],
+					"proxy_host": null,
+					"proxy_user": null,
+					"tags": [],
+					"uuid": "8103df2e-703f-4588-bd3c-7acca74f0378"
+				}
+			],
+			"quotas": [
+				{
+					"description": "",
+					"networks": 1,
+					"per_user": false,
+					"ports": 100,
+					"project": "4dd93340f51f4206a8dfd0569d4eb812",
+					"public_ips": 50,
+					"security_group_rules": 3000,
+					"security_groups": 1000,
+					"type": "network",
+					"usage": false
+				},
+				{
+					"description": "",
+					"networks": 1,
+					"per_user": false,
+					"ports": 51,
+					"project": "4dd93340f51f4206a8dfd0569d4eb812",
+					"public_ips": 24,
+					"security_group_rules": 381,
+					"security_groups": 77,
+					"type": "network",
+					"usage": true
+				}
+			],
+			"type": "network"
+		}
+	],
+	"object_store_services": [],
+	"overbooking_cpu": 1.0,
+	"overbooking_ram": 1.0,
+	"project_id": "4dd93340f51f4206a8dfd0569d4eb812",
+	"provider_name": "CLOUD-CNAF-T1",
+	"provider_type": "openstack",
+	"region_name": "tier1",
+	"timestamp": "2025-10-03T07:05:33+00:00",
+	"user_group": "admins/catchall"
