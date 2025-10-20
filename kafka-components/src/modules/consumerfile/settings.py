@@ -72,6 +72,16 @@ class ConsumerFile(BaseSettings):
         else:
             raise ValueError(f"Unsupported deserializer: {function_name}")
     
+    @validator("value_serializer", pre=True, always=True)
+    def parse_kafka_value_serializer(cls, v, values) -> Callable:
+        function_name = values.get('KAFKA_VALUE_SERIALIZER_STR', 'json')
+        if function_name == 'json':
+            return lambda x: json.dumps(x, sort_keys=True).encode('utf-8')
+        elif function_name == 'string':
+            return lambda x: x.encode('utf-8')
+        else:
+            raise ValueError(f"Unsupported serializer: {function_name}")
+        
     def get_values(self) -> Dict[str, Any]:
         settings_dict = {}
         for key, value in self.model_dump().items():

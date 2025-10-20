@@ -17,7 +17,10 @@ if __name__ == "__main__":
     settings = Config()
     logger = create_logger(settings)
     logger.info(settings.show_configs())
-
+    print("#"*30)
+    print((settings.show_configs()))
+    print("#"*30)
+    
     # Init external objects
     processor = Processor(settings, logger)
     

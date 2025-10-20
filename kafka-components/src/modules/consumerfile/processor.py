@@ -30,7 +30,8 @@ class ConsumerFileProcessor:
         for topic, messages in collected_msgs.items():
             self.logger.debug(f"Collected {len(messages)} from topic {topic}")   
             
-            filename = f"{self.settings.OUTPUT_FILENAME_BASE}_{topic.replace('-', '_')}_history.txt"
+            filename = f"{self.settings.LOG_DIR}/{self.settings.OUTPUT_FILENAME_BASE}_{topic.replace('-', '_')}_msgs.txt"
+            self.logger.info(f"Filename where store messages from topic {topic}")   
             with open(filename, 'w') as fout:
                 for message in messages:
                     fout.write(f"{message.value}\n")
