@@ -33,6 +33,12 @@ Thumbs.db
 # Ignore all JSON and LP files under test/ and subdirectories
 **/*.json
 **/*.lp
+# Allow Grafana provisioning folder and dashboard JSON
+!influxdb-processor/Docker_test/data/grafana/
+!influxdb-processor/Docker_test/data/grafana/dashboards/
+!influxdb-processor/Docker_test/data/grafana/dashboards/Test-dashboard.json
+
+
 
 # Ignore Kafka runtime data and other container-generated files
 influxdb-processor/Docker_test/data/kafka/
