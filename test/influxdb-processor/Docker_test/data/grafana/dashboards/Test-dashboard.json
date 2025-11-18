@@ -27,60 +27,20 @@
         "type": "influxdb",
         "uid": "influxdb_ds"
       },
-      "description": "Block storage - storage quota & usage",
+      "description": "Block storage usage for all projects under the selected provider, with remaining capacity shown as the unused portion of the total quota.",
       "fieldConfig": {
         "defaults": {
           "color": {
             "mode": "palette-classic"
           },
           "custom": {
-            "axisBorderShow": false,
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "barWidthFactor": 0.6,
-            "drawStyle": "line",
-            "fillOpacity": 0,
-            "gradientMode": "none",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
               "viz": false
-            },
-            "insertNulls": false,
-            "lineInterpolation": "linear",
-            "lineWidth": 1,
-            "pointSize": 5,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "showValues": false,
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
             }
           },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": 0
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
+          "mappings": []
         },
         "overrides": []
       },
@@ -90,14 +50,96 @@
         "x": 0,
         "y": 0
       },
-      "id": 5,
+      "id": 7,
       "options": {
+        "displayLabels": [
+          "percent"
+        ],
         "legend": {
           "calcs": [],
           "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
+          "placement": "right",
+          "showLegend": true,
+          "values": [
+            "percent"
+          ]
         },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "/^_value$/",
+          "limit": 100,
+          "values": true
+        },
+        "sort": "desc",
+        "tooltip": {
+          "hideZeros": false,
+          "maxWidth": 1,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.1",
+      "targets": [
+        {
+          "query": "import \"array\"\n\ndata = from(bucket: \"feeder_metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"block_storage_services\")\n  |> filter(fn: (r) => r.provider_name == \"${provider_name}\")\n\nusage_per_project = data\n  |> filter(fn: (r) => r._field == \"storage_gb_usage\")\n  |> group(columns: [\"project_id\"])\n  |> sum()\n\nquota_total = data\n  |> filter(fn: (r) => r._field == \"storage_gb_quota\")\n  |> group()\n  |> sum()\n  |> findRecord(fn: (key) => true, idx: 0)\n\nusage_total = usage_per_project\n  |> group()\n  |> sum()\n  |> findRecord(fn: (key) => true, idx: 0)\n\nremaining = quota_total._value - usage_total._value\n\nusage_rows = usage_per_project\n  |> map(fn: (r) => ({\n        label: \"Project \" + r.project_id,\n        _value: r._value\n     }))\n\nremaining_row = array.from(rows: [\n  {label: \"Available\", _value: remaining}\n])\n\nresult = union(tables: [usage_rows, remaining_row])\n\nresult\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Block Storage Consumption (per Provider) ",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb_ds"
+      },
+      "description": "Aggregated block storage consumption for all projects belonging to the selected user group. The pie chart shows the share of used capacity versus the remaining available quota.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 6,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "calcs": [],
+          "displayMode": "hidden",
+          "placement": "right",
+          "showLegend": false,
+          "values": []
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "sort": "desc",
         "tooltip": {
           "hideZeros": false,
           "mode": "single",
@@ -107,12 +149,78 @@
       "pluginVersion": "12.2.1",
       "targets": [
         {
-          "query": "from(bucket: \"feeder_metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"block_storage_services\")\n  |> filter(fn: (r) => r.provider_name == \"${provider_name}\")\n  |> filter(fn: (r) => r.project_id == \"${project_id}\")\n  |> filter(fn: (r) => r.region_name == \"${region_name}\")\n  |> filter(fn: (r) => r._field =~ /storage_gb_(usage|quota)/)\n  |> group(columns: [\"_field\"])",
+          "query": "import \"array\"\n\ndata = from(bucket: \"feeder_metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"block_storage_services\")\n  |> filter(fn: (r) => r.user_group == \"${user_group}\")\n  |> filter(fn: (r) => r._field == \"storage_gb_usage\" or r._field == \"storage_gb_quota\")\n\ntotals = data\n  |> group(columns: [\"_field\"])\n  |> sum()\n\nusage = totals\n  |> filter(fn: (r) => r._field == \"storage_gb_usage\")\n  |> findRecord(fn: (key) => true, idx: 0)\n\nquota = totals\n  |> filter(fn: (r) => r._field == \"storage_gb_quota\")\n  |> findRecord(fn: (key) => true, idx: 0)\n\nresult = array.from(rows: [\n    {_value: usage._value,   label: \"Used\"},\n    {_value: quota._value - usage._value, label: \"Available\"},\n])\n\nresult\n\n\n\n\n\n",
           "refId": "A"
         }
       ],
-      "title": "Block storage services",
-      "type": "timeseries"
+      "title": "Block Storage Capacity Distribution (Per User Group)",
+      "type": "piechart"
+    },
+    {
+      "datasource": {
+        "type": "influxdb",
+        "uid": "influxdb_ds"
+      },
+      "description": "Aggregated block storage usage and residual capacity for the chosen project. The quota defines the total available space, while the chart highlights the share currently consumed.",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            }
+          },
+          "mappings": []
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 5,
+      "options": {
+        "displayLabels": [
+          "percent"
+        ],
+        "legend": {
+          "calcs": [],
+          "displayMode": "hidden",
+          "placement": "right",
+          "showLegend": false,
+          "values": []
+        },
+        "pieType": "pie",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": true
+        },
+        "sort": "desc",
+        "tooltip": {
+          "hideZeros": false,
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "pluginVersion": "12.2.1",
+      "targets": [
+        {
+          "hide": false,
+          "query": "import \"array\"\n\ndata = from(bucket: \"feeder_metrics\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r._measurement == \"block_storage_services\")\n  |> filter(fn: (r) => r.project_id == \"${project_id}\")\n  |> filter(fn: (r) => r._field == \"storage_gb_usage\" or r._field == \"storage_gb_quota\")\n\ntotals = data\n  |> group(columns: [\"_field\"])\n  |> sum()\n\nusage = totals\n  |> filter(fn: (r) => r._field == \"storage_gb_usage\")\n  |> findRecord(fn: (key) => true, idx: 0)\n\nquota = totals\n  |> filter(fn: (r) => r._field == \"storage_gb_quota\")\n  |> findRecord(fn: (key) => true, idx: 0)\n\nresult = array.from(rows: [\n    {_value: usage._value,   label: \"Used\"},\n    {_value: quota._value - usage._value, label: \"Available\"},\n])\n\nresult\n\n\n\n\n",
+          "refId": "A"
+        }
+      ],
+      "title": "Block Storage Capacity Distribution (Per Project)",
+      "type": "piechart"
     },
     {
       "datasource": {
@@ -180,7 +288,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 8
+        "y": 24
       },
       "id": 4,
       "options": {
@@ -212,7 +320,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 16
+        "y": 32
       },
       "id": 3,
       "panels": [],
@@ -285,7 +393,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 17
+        "y": 33
       },
       "id": 2,
       "options": {
@@ -418,7 +526,7 @@
         "h": 8,
         "w": 12,
         "x": 0,
-        "y": 25
+        "y": 41
       },
       "id": 1,
       "options": {
@@ -459,11 +567,11 @@
           "text": "",
           "value": ""
         },
-        "definition": "import \"influxdata/influxdb/v1\"\n\nv1.tagValues(\n  bucket: \"feeder_metrics\",\n  tag: \"project_id\",\n  predicate: (r) => r._measurement =~ /(compute_services|block_storage_services|network_services)/ and r.provider_name == \"${provider_name}\" \n)\n\n",
+        "definition": "import \"influxdata/influxdb/v1\"\n\nv1.tagValues(\n  bucket: \"feeder_metrics\",\n  tag: \"project_id\",\n  predicate: (r) => r._measurement =~ /(compute_services|block_storage_services|network_services)/ \n)\n\n",
         "name": "project_id",
         "options": [],
         "query": {
-          "query": "import \"influxdata/influxdb/v1\"\n\nv1.tagValues(\n  bucket: \"feeder_metrics\",\n  tag: \"project_id\",\n  predicate: (r) => r._measurement =~ /(compute_services|block_storage_services|network_services)/ and r.provider_name == \"${provider_name}\" \n)\n\n"
+          "query": "import \"influxdata/influxdb/v1\"\n\nv1.tagValues(\n  bucket: \"feeder_metrics\",\n  tag: \"project_id\",\n  predicate: (r) => r._measurement =~ /(compute_services|block_storage_services|network_services)/ \n)\n\n"
         },
         "refresh": 1,
         "regex": "",
@@ -500,6 +608,21 @@
         "refresh": 1,
         "regex": "",
         "type": "query"
+      },
+      {
+        "current": {
+          "text": "admins/beta-testers",
+          "value": "admins/beta-testers"
+        },
+        "definition": "import \"influxdata/influxdb/v1\"\n\nv1.tagValues(\n  bucket: \"feeder_metrics\",\n  tag: \"user_group\"\n)",
+        "name": "user_group",
+        "options": [],
+        "query": {
+          "query": "import \"influxdata/influxdb/v1\"\n\nv1.tagValues(\n  bucket: \"feeder_metrics\",\n  tag: \"user_group\"\n)"
+        },
+        "refresh": 1,
+        "regex": "",
+        "type": "query"
       }
     ]
   },
@@ -511,5 +634,5 @@
   "timezone": "browser",
   "title": "Test - dashboard Copy",
   "uid": "ad9qxf6",
-  "version": 2
+  "version": 1
 }

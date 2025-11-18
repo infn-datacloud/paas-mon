@@ -27,7 +27,7 @@ services:
     restart: unless-stopped
 
   kafka-broker:
-    image: apache/kafka:latest
+    image: apache/kafka:4.0.0
     container_name: kafka-broker
     hostname: kafka-broker
     networks:
@@ -89,15 +89,15 @@ services:
     restart: "no"
 
   telegraf:
-    image: telegraf:latest
+    image: telegraf:1.36.4
     container_name: telegraf
     depends_on:
       kafka-broker:
         condition: service_healthy
       influxdb:
         condition: service_healthy
-      app_python:
-        condition: service_completed_successfully
+      # app_python:
+      #  condition: service_completed_successfully
     networks: 
       - kafka_net
     env_file: .env
@@ -108,7 +108,7 @@ services:
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:12.2
     container_name: grafana
     depends_on:
       influxdb:
