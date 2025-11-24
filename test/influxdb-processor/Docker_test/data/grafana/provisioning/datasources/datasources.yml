@@ -13,6 +13,6 @@ datasources:
       defaultBucket: feeder_metrics
 
     secureJsonData:
-      token: ${INFLUX_TOKEN}
+      token: ${INFLUX_GRAFANA_TOKEN}
 
     isDefault: true

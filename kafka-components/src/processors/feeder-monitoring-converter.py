@@ -1,7 +1,7 @@
 import logging
 from modules.utilities.kafka_client import KafkaClient
-from modules.monitoring.msg_v13_model import json_to_lines
-from modules.monitoring.config import ProviderSelectorConfig
+from modules.feedermonitoring.msg_v13_model import json_to_lines
+from modules.feedermonitoring.MonitoringConfig import MonitoringConfig
 import json
 
 # ---------------------------------------------------------------------------------------
@@ -42,60 +42,52 @@ def main():
     logger = build_logger()
     
     # Load configuration parameters from environment variables or defaults
-    configs = ProviderSelectorConfig()
+    configs = MonitoringConfig()
     
     # Initialize Kafka client 
     client = KafkaClient(logger, **configs.get_values())
     
-    # Retrieve all messages from the configured input topics
-    messages = client.collect_all_msgs_from_topics(topics=client.input_topics)
-
-    if not messages:
-        logger.warning("No topics found in configuration or no messages collected.")
-        return
+    logger.info(f"Listening for messages on topics: {client.input_topics}")
     
-    # Identify topics that are configured but contain no data
-    empty_topics = [t for t, msgs in messages.items() if not msgs]
-    if empty_topics:
-        logger.info(f"The following topics are empty: {', '.join(empty_topics)}")
-        return
-
-    logger.info("All input topics contain messages.")
-    total, success, fail = 0, 0, 0
-
-    # Process each Kafka message and convert it to InfluxDB Line Protocol
-    for topic, msg_list in messages.items():
-        logger.info(f"Processing {len(msg_list)} messages from topic '{topic}'.")
-        for message in msg_list:
-            total += 1
+    try:
+        for message in client.consumer:
             msg = message.value
             timestamp = msg.get("timestamp", "unknown")
             
             try:
-                # Convert JSON message to InfluxDB Line Protocol format
-                msg_lp = "\n".join(json_to_lines(msg))
+                parsed = json_to_lines(msg, output_format=configs.OUTPUT_FORMAT)
             except Exception as e:
                 logger.warning(f"Failed to parse message with timestamp {timestamp}: {e}")
-                fail += 1
                 continue
 
+            # Format output depending on user configuration
+            if configs.OUTPUT_FORMAT == "line_protocol":
+                # parsed = list[str]
+                output_value = "\n".join(parsed)
+
+            elif configs.OUTPUT_FORMAT == "json":
+                # parsed = list[dict]
+                try:
+                    output_value = json.dumps(parsed)
+                except Exception as e:
+                    logger.error(f"Failed to serialize JSON output for timestamp {timestamp}: {e}")
+                    continue
+
+            else:
+                logger.error(f"Unsupported OUTPUT_FORMAT '{configs.OUTPUT_FORMAT}'. Expected 'line_protocol' or 'json'.")
+                continue
+
+            # Send to Kafka
             try:
-                client.send(msg_lp)
-                success += 1
-                logger.debug(f"Message with timestamp {timestamp} successfully sent to '{client.output_topic}'.")
+                client.send(output_value)
             except Exception as e:
                 logger.error(f"Failed to send message with timestamp {timestamp}: {e}")
-                fail += 1
+    
+    except KeyboardInterrupt:
+        logger.info("Shutting down processor...")
 
-    # --- Summary and graceful shutdown ---
-    logger.info(f"Processing summary — Total: {total}, Success: {success}, Failed: {fail}")
-
-    try:
-        if client.consumer is not None:
-            client.consumer.close()
-            logger.info("Consumer closed successfully.")
     except Exception as e:
-        logger.warning(f"Error during consumer closure: {e}")
+        logger.error(f"Fatal error: {e}")
 
 if __name__ == "__main__":
     main()

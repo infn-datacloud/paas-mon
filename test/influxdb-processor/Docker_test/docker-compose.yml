@@ -4,21 +4,24 @@ networks:
 
 services:
   influxdb:
-    image: influxdb:2.7
+    build:
+      context: .
+      dockerfile: ./influxdb/Dockerfile.influxdb
     container_name: influxdb
     ports:
       - "8086:8086"
     networks: 
       - kafka_net
-    env_file: .env
+    env_file:
+      - .env
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
-      - DOCKER_INFLUXDB_INIT_USERNAME=${DOCKER_INFLUXDB_INIT_USERNAME}
-      - DOCKER_INFLUXDB_INIT_PASSWORD=${DOCKER_INFLUXDB_INIT_PASSWORD}
-      - DOCKER_INFLUXDB_INIT_ORG=${DOCKER_INFLUXDB_INIT_ORG}
-      - DOCKER_INFLUXDB_INIT_BUCKET=${DOCKER_INFLUXDB_INIT_BUCKET}
-      - DOCKER_INFLUXDB_INIT_RETENTION=${DOCKER_INFLUXDB_INIT_RETENTION}
-      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${DOCKER_INFLUXDB_INIT_ADMIN_TOKEN}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE=/generated_admin_token
+    volumes:
+      -  influxdb_data:/var/lib/influxdb2
+      -  grafana_tokens:/tokens/grafana:rw
+      -  telegraf_tokens:/tokens/telegraf:rw
+      -  admin_tokens:/tokens/admin
     healthcheck:
       test: ["CMD-SHELL", "curl -sf http://localhost:8086/health >/dev/null"]
       interval: 10s
@@ -38,44 +41,55 @@ services:
       - "${KAFKA_EXTERNAL_PORT}:${KAFKA_EXTERNAL_PORT}"
     env_file: .env
     environment:
-      KAFKA_NODE_ID: "${KAFKA_NODE_ID}"
+      KAFKA_NODE_ID: "1"
+      CLUSTER_ID: D9Jv0j4TRpS90mYQh_8hAA
       KAFKA_PROCESS_ROLES: "broker,controller"
-      CLUSTER_ID: "${KAFKA_CLUSTER_ID}"
-      KAFKA_LOG_DIRS: "${KAFKA_LOG_DIRS}"
-
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
-      KAFKA_CONTROLLER_QUORUM_VOTERS: "${KAFKA_NODE_ID}@${ADVERTISED_HOST_INTERNAL}:${KAFKA_CONTROLLER_PORT}"
-
-      KAFKA_LISTENERS: "INTERNAL_LOCALHOST://0.0.0.0:${KAFKA_INTERNAL_PORT},CONTROLLER://0.0.0.0:${KAFKA_CONTROLLER_PORT},EXTERNAL://0.0.0.0:${KAFKA_EXTERNAL_PORT}"
-      KAFKA_ADVERTISED_LISTENERS: "INTERNAL_LOCALHOST://${ADVERTISED_HOST_INTERNAL}:${KAFKA_INTERNAL_PORT},EXTERNAL://${ADVERTISED_HOST_EXTERNAL}:${KAFKA_EXTERNAL_PORT}"
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "INTERNAL_LOCALHOST:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT"
       KAFKA_INTER_BROKER_LISTENER_NAME: "INTERNAL_LOCALHOST"
-
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "${KAFKA_AUTO_CREATE_TOPICS_ENABLE}"
       KAFKA_MIN_INSYNC_REPLICAS: "1"
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
-      KAFKA_LOG_RETENTION_MS: "${KAFKA_LOG_RETENTION_MS}"
+
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@${ADVERTISED_HOST_INTERNAL}:${KAFKA_CONTROLLER_PORT}"
+      KAFKA_LISTENERS: "INTERNAL_LOCALHOST://0.0.0.0:${KAFKA_INTERNAL_PORT},CONTROLLER://0.0.0.0:${KAFKA_CONTROLLER_PORT},EXTERNAL://0.0.0.0:${KAFKA_EXTERNAL_PORT}"
+      KAFKA_ADVERTISED_LISTENERS: "INTERNAL_LOCALHOST://${ADVERTISED_HOST_INTERNAL}:${KAFKA_INTERNAL_PORT},EXTERNAL://${ADVERTISED_HOST_EXTERNAL}:${KAFKA_EXTERNAL_PORT}"
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:${KAFKA_INTERNAL_PORT} > /dev/null 2>&1",
-        ]
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:${KAFKA_INTERNAL_PORT} > /dev/null 2>&1"]
       interval: 10s
       timeout: 10s
       retries: 10
 
 
-  app_python:
+  feeder_loader:
+    build:
+      context: ../../../
+      dockerfile: ./test/influxdb-processor/Docker_test/feeder_loader/Dockerfile
+      args:
+        PYTHON_VERSION: "3.10"
+        POETRY_VERSION: "1.8.3"
+    container_name: feeder_loader
+    networks:
+      - kafka_net
+    env_file: .env
+    environment:
+      PYTHONPATH: "./feeder_loader/scripts/modules:${PYTHONPATH}"
+    volumes:
+      - ./feeder_loader/scripts:/feeder_loader/scripts
+    depends_on:  
+        kafka-broker:
+            condition: service_healthy
+    restart: "no"
+
+  app_processor:
     build:
       context: ../../../
       dockerfile: ./test/influxdb-processor/Docker_test/app/Dockerfile
       args:
         PYTHON_VERSION: "3.10"
         POETRY_VERSION: "1.8.3"
-    container_name: app_python
+    container_name: app_processor
     networks:
       - kafka_net
     env_file: .env
@@ -89,26 +103,28 @@ services:
     restart: "no"
 
   telegraf:
-    image: telegraf:1.36.4
+    build:
+      context: .
+      dockerfile: ./telegraf/Dockerfile.telegraf
     container_name: telegraf
     depends_on:
       kafka-broker:
         condition: service_healthy
       influxdb:
         condition: service_healthy
-      # app_python:
-      #  condition: service_completed_successfully
     networks: 
       - kafka_net
-    env_file: .env
-    environment:
-      - INFLUX_TOKEN=${INFLUX_TOKEN}
+    env_file:
+      - .env
     volumes:
       - ./data/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - telegraf_tokens:/tokens/telegraf:ro
     restart: unless-stopped
 
   grafana:
-    image: grafana/grafana:12.2
+    build:
+      context: .
+      dockerfile: ./grafana/Dockerfile.grafana
     container_name: grafana
     depends_on:
       influxdb:
@@ -119,26 +135,33 @@ services:
       - kafka_net
     env_file: .env
     environment:
-      - GF_SECURITY_ADMIN_USER=${GF_SECURITY_ADMIN_USER}
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
       - GF_USERS_ALLOW_SIGN_UP=false
     volumes:
       - ./data/grafana/provisioning:/etc/grafana/provisioning
       - ./data/grafana/dashboards:/etc/grafana/dashboards
+      - grafana_tokens:/tokens/grafana:ro
     restart: unless-stopped
 
-#  kafka-ui:
-#    image: provectuslabs/kafka-ui:latest
-#    container_name: kafka-ui
-#    depends_on:
-#      kafka-broker:
-#        condition: service_healthy
-#    networks: 
-#      - kafka_net
-#    ports:
-#      - "9999:8080"
-#    environment:
-#      KAFKA_CLUSTERS_0_NAME: "local"
-#      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka-broker:9092"
-#      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
-#    restart: unless-stopped
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      kafka-broker:
+        condition: service_healthy
+    networks: 
+      - kafka_net
+    ports:
+      - "9999:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: "local"
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka-broker:9092"
+      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
+    restart: unless-stopped
+
+volumes:
+  grafana_tokens:
+  telegraf_tokens:
+  influxdb_data:
+  admin_tokens:
+

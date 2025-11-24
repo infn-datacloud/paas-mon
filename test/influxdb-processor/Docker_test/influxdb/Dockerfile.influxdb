@@ -1,0 +1,21 @@
+FROM influxdb:2.7
+
+# Install jq
+RUN apt-get update && \
+    apt-get install -y jq && \
+    rm -rf /var/lib/apt/lists/*
+
+
+# Generate admin token at build time and store it
+RUN ADMIN_TOKEN=$(openssl rand -hex 32) \
+    && echo "$ADMIN_TOKEN" > /generated_admin_token
+
+# Copy init script
+COPY ./influxdb/create-all-tokens.sh /docker-entrypoint-initdb.d/01-create-tokens.sh
+RUN chmod +x /docker-entrypoint-initdb.d/01-create-tokens.sh
+
+
+
+
+
+

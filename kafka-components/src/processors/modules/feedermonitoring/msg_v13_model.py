@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field, ValidationError, field_validator
 import logging
 import json
 
-from modules.monitoring.Influxdb_message import (
+from modules.feedermonitoring.Influxdb_message import (
     parse_ts_ns,
     InfluxdbMessage,
 )

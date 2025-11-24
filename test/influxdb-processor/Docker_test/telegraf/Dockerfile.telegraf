@@ -1,0 +1,6 @@
+FROM telegraf:1.36.4
+
+COPY ./telegraf/telegraf-entrypoint.sh /telegraf-entrypoint.sh
+RUN chmod +x /telegraf-entrypoint.sh
+
+ENTRYPOINT ["/telegraf-entrypoint.sh"]

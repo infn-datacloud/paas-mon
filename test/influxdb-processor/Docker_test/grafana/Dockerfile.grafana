@@ -1,0 +1,10 @@
+FROM grafana/grafana:12.2
+
+COPY ./grafana/grafana-entrypoint.sh /etc/grafana/grafana-entrypoint.sh
+
+USER root
+RUN chmod +x /etc/grafana/grafana-entrypoint.sh
+
+USER grafana
+
+ENTRYPOINT ["/etc/grafana/grafana-entrypoint.sh"]
