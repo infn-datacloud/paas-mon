@@ -7,8 +7,8 @@ RUN apt-get update && \
 
 
 # Generate admin token at build time and store it
-RUN ADMIN_TOKEN=$(openssl rand -hex 32) \
-    && echo "$ADMIN_TOKEN" > /generated_admin_token
+RUN echo "$(openssl rand -hex 32)" > /generated_admin_token
+
 
 # Copy init script
 COPY ./influxdb/create-all-tokens.sh /docker-entrypoint-initdb.d/01-create-tokens.sh

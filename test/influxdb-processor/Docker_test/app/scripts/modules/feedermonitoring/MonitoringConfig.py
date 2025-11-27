@@ -49,7 +49,7 @@ class MonitoringConfig(BaseSettings):
     value_deserializer: Callable = None
 
     # --- Message format ---
-    OUTPUT_FORMAT: str = Field(default="line_protocol", env="OUTPUT_FORMAT")
+    OUTPUT_FORMAT: str = Field(default="influx", env="OUTPUT_FORMAT")
 
 
     # --- Validators to generate (de)serializers automatically ---
@@ -82,7 +82,7 @@ class MonitoringConfig(BaseSettings):
     # --- The function json_to_lines can convert messages only in line protocol or json format
     @field_validator("OUTPUT_FORMAT")
     def validate_output_format(cls, v):
-        allowed = {"line_protocol", "json"}
+        allowed = {"influx", "json_v2"}
         if v not in allowed:
             raise ValueError(f"OUTPUT_FORMAT must be one of {allowed}")
         return v

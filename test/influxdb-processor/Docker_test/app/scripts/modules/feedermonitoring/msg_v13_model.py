@@ -433,7 +433,7 @@ class Envelope(BaseCfg):
         return str(v).strip()
 
 
-def json_to_lines(msg: dict[str, Any], output_format: str = "line_protocol") -> list[str | dict]:
+def json_to_lines(msg: dict[str, Any], output_format: str = "influx") -> list[str | dict]:
     """
     Convert a versioned JSON message into InfluxDB-friendly output.
 
@@ -441,14 +441,14 @@ def json_to_lines(msg: dict[str, Any], output_format: str = "line_protocol") -> 
     ----------
     msg : dict[str, Any]
         Input JSON message.
-    output_format : {"line_protocol", "json"}, default "line_protocol"
+    output_format : {"influx", "json_v2"}, default "influx"
         Output format selector.
 
     Returns
     -------
     list[str | dict]
-        A list of Line Protocol strings (for "line_protocol") or
-        a list of JSON dicts (for "json"). Returns an empty list on validation errors.
+        A list of Line Protocol strings (for "influx") or
+        a list of JSON dicts (for "json_v2"). Returns an empty list on validation errors.
 
     Logging
     -------
@@ -471,7 +471,7 @@ def json_to_lines(msg: dict[str, Any], output_format: str = "line_protocol") -> 
         logger.error("MsgV13 parsing failed: %s", e)
         return []
     
-    return model.to_json_format() if output_format == "json" else model.to_lp_format()
+    return model.to_json_format() if output_format == "json_v2" else model.to_lp_format()
 
 
 if __name__ == "__main__":
@@ -489,7 +489,7 @@ if __name__ == "__main__":
             f.write(line + "\n")
     
     # Output JSON
-    json_msgs = json_to_lines(data, output_format="json")
+    json_msgs = json_to_lines(data, output_format="json_v2")
     with open("output.json", "w") as f:
         json.dump(json_msgs, f, indent=2)
 

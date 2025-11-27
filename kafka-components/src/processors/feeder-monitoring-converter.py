@@ -61,27 +61,30 @@ def main():
                 continue
 
             # Format output depending on user configuration
-            if configs.OUTPUT_FORMAT == "line_protocol":
+            if configs.OUTPUT_FORMAT == "influx":
                 # parsed = list[str]
                 output_value = "\n".join(parsed)
-
-            elif configs.OUTPUT_FORMAT == "json":
-                # parsed = list[dict]
                 try:
-                    output_value = json.dumps(parsed)
-                except Exception as e:
-                    logger.error(f"Failed to serialize JSON output for timestamp {timestamp}: {e}")
-                    continue
+                    client.send(output_value)
+                except:
+                    logger.error(f"Failed to send InfluxDB Line Protocol message for timestamp {timestamp}")
+                    continue  # Move to next message after sending all services 
+
+            elif configs.OUTPUT_FORMAT == "json_v2":
+                # parsed = list[dict]
+                for service in parsed:
+                    try:
+                        client.send(service)
+                    except Exception as e:
+                            logger.error(f"Failed to send JSON message for timestamp {timestamp}: {e}")
+                            continue
 
             else:
-                logger.error(f"Unsupported OUTPUT_FORMAT '{configs.OUTPUT_FORMAT}'. Expected 'line_protocol' or 'json'.")
+                logger.error(
+                    f"Unsupported OUTPUT_FORMAT '{configs.OUTPUT_FORMAT}'. "
+                    f"Expected 'influx' or 'json_v2'."
+                )
                 continue
-
-            # Send to Kafka
-            try:
-                client.send(output_value)
-            except Exception as e:
-                logger.error(f"Failed to send message with timestamp {timestamp}: {e}")
     
     except KeyboardInterrupt:
         logger.info("Shutting down processor...")

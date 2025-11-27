@@ -160,7 +160,7 @@ class KafkaClient():
                                         string.digits, k=64))
             group_base = '-'.join(self.input_topics)
             temp_consumer_conf = copy.copy(self.cons_configs)
-            temp_consumer_conf['consumer_timeout_ms'] = 4000
+            temp_consumer_conf['consumer_timeout_ms'] = 1000
             temp_consumer_conf['group_id'] = group_base + group_id
             temp_consumer_conf['client_id'] = group_base + group_id
             temp_consumer_conf['max_poll_records'] = 10000

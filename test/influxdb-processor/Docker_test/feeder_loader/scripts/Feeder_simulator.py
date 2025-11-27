@@ -1,9 +1,10 @@
 import json
 import logging
 from pathlib import Path
-from modules.utilities.kafka_client import KafkaClient
-from modules.monitoring.MonitoringConfig import MonitoringConfig
+from modules_feeder.utilities.kafka_client import KafkaClient
+from modules_feeder.monitoring.MonitoringConfig import MonitoringConfig
 import time
+import os
 
 # -----------------------------------------------------------------------------
 # This script simulates a "feeder" component that publishes JSON messages
@@ -32,10 +33,10 @@ def main():
 
     # --- KafkaClient configuration override ---
     client = KafkaClient(logger, **configs.get_values())
-    client.output_topic = "paas_mon"
+    client.output_topic = configs.KAFKA_INPUT_TOPICS[0]
     # --- Input file path ---
     SCRIPT_DIR = Path(__file__).resolve().parent
-    input_file = SCRIPT_DIR / "input" / "output_feeder_msgs.json"
+    input_file = SCRIPT_DIR / "input" / os.getenv("FEEDER_INPUT_FILE")
 
     if not input_file.exists():
         logger.error(f"Input file not found: {input_file}")

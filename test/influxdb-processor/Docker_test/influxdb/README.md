@@ -1,67 +1,152 @@
-## InfluxDB Initialization and Automatic Token Generation
+## InfluxDB Initialization and Automatic Token Management
 
-This document describes the initialization workflow implemented for the InfluxDB service, including the automatic creation of all required authentication tokens (admin, Grafana read-only, Telegraf write-only).
+This document explains how the custom InfluxDB container initializes itself,
+creates all required authentication tokens, and persists them using named volumes.
 
-### Overview
+--------------------------------------------------------------------------------
+## Overview
 
-The InfluxDB container is built from a custom Dockerfile that generates a random admin token at build time and stores it inside the image. When the container starts for the first time, the official InfluxDB entrypoint detects that no database exists yet and performs the full initialization routine. During this phase, all scripts inside:
+The InfluxDB service uses a custom build process and a runtime initialization
+mechanism based on scripts placed into the following directory **inside the InfluxDB image**:
 
-/docker-entrypoint-initdb.d/
+    /docker-entrypoint-initdb.d/
 
-are executed automatically. The script `create-all-tokens.sh` then generates the remaining tokens and stores them in named volumes.
+The workflow consists of:
+1. Build-time generation of an admin token
+2. First-run InfluxDB setup
+3. Automatic creation of Grafana and Telegraf tokens
+4. Persistence of all tokens through named volumes
 
-### How the Initialization Works
+--------------------------------------------------------------------------------
+## 1. Build-Time Initialization (Admin Token)
 
-#### 1. Build-time: Generate Admin Token
-During docker build:
-- A random admin token is generated (`openssl rand -hex 32`)
-- It is written to `/generated_admin_token` inside the image
-- It is exposed to the InfluxDB entrypoint via:
-  DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE=/generated_admin_token
+During the Docker image build (from [`Dockerfile.influxdb`](Dockerfile.influxdb)):
+
+- A random admin token is generated via:
+
+      openssl rand -hex 32
+
+- The token is stored inside the image at:
+
+      /generated_admin_token
+
+- The file is passed to the InfluxDB entrypoint using:
+
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE=/generated_admin_token
+
+No bucket, organization, or user is created at build time.
+Only the admin token exists at this stage.
+
+--------------------------------------------------------------------------------
+## 2. First Container Startup (Automatic Setup)
+
+When the container starts, the InfluxDB entrypoint checks:
+
+      /var/lib/influxdb2
+
+Behavior:
+
+- If the directory is **empty** → first-run setup  
+- If the directory is **not empty** → startup without initialization  
+
+During first run, InfluxDB reads values from the following variables:
+
+      DOCKER_INFLUXDB_INIT_MODE
+      DOCKER_INFLUXDB_INIT_USERNAME
+      DOCKER_INFLUXDB_INIT_PASSWORD
+      DOCKER_INFLUXDB_INIT_ORG
+      DOCKER_INFLUXDB_INIT_BUCKET
+      DOCKER_INFLUXDB_INIT_RETENTION
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE
+
+Then, InfluxDB executes all scripts found in:
+
+      /docker-entrypoint-initdb.d/
+
+including the token generation script.
+
+--------------------------------------------------------------------------------
+## 3. Token Generation Script (Grafana, Telegraf, Admin Copy)
+
+The script:
+
+      [`influxdb/create-all-tokens.sh`](influxdb/create-all-tokens.sh)
+
+runs during the initialization phase.
+
+It performs these steps:
+
+1. Reads the admin token 
+2. Retrieves the bucket ID 
+3. Creates three tokens:
+   - Grafana read-only token
+   - Telegraf write-only token
+   - Admin token copy 
+4. Stores the tokens in the mounted named volumes:
+
+         /tokens/grafana/grafana_token.txt
+         /tokens/telegraf/telegraf_token.txt
+         /tokens/admin/admin_token.txt
+
+These paths correspond to the Docker volumes:
+
+         grafana_tokens
+         telegraf_tokens
+         admin_tokens
+
+which persist independently of container recreation.
+
+--------------------------------------------------------------------------------
+## 4. Persistence and Re-Initialization Rules
+
+### First startup (empty `/var/lib/influxdb2`)
+- InfluxDB performs full setup  
+- `create-all-tokens.sh` is executed  
+- All tokens are written to:
+
+        /tokens/grafana/
+        /tokens/telegraf/
+        /tokens/admin/
+
+### Subsequent startups (non-empty `/var/lib/influxdb2`)
+- No setup is performed  
+- No script inside `/docker-entrypoint-initdb.d/` is executed  
+- All previously generated tokens remain valid  
+- Named volumes preserve token files
+
+### Token loss conditions
+Tokens are deleted **only if the named volumes are explicitly removed**.
+
+--------------------------------------------------------------------------------
+## Recommendations
+
+1. Before running:
+
+         docker compose up
+
+   ensure the host directory mapped to:
+
+         /var/lib/influxdb2
+
+   is empty, otherwise initialization will not run.
+
+2. Do **not** delete the token volumes:
+
+         grafana_tokens
+         telegraf_tokens
+         admin_tokens
+
+   unless you intend to regenerate all tokens.
+
+3. To fully reset InfluxDB authentication:
+   - Remove the volume mapped to `/var/lib/influxdb2`
+   - Remove all `/tokens/*` volumes
+   - Rebuild the image
+   - Run `docker compose up` again
+
+--------------------------------------------------------------------------------
 
 
-#### 2. First Container Startup: InfluxDB Setup
 
-When the container starts, the entrypoint checks `/var/lib/influxdb2`.  
-If the directory is empty, this is considered a first-run setup. InfluxDB:
 
-1. Runs the automatic setup using DOCKER_INFLUXDB_INIT_* variables  
-2. Loads the admin token from `/generated_admin_token`  
-3. Creates the initial organization and bucket  
-4. Executes all scripts in `/docker-entrypoint-initdb.d/`
 
-#### 3. Token Generation Script
-
-`create-all-tokens.sh` is executed automatically and:
-- Reads the admin token from `/generated_admin_token`
-- Retrieves the bucket ID
-- Creates:
-  - Grafana read-only token
-  - Telegraf write-only token
-- Saves tokens into the mounted volumes:
-  /tokens/grafana/grafana_token.txt
-  /tokens/telegraf/telegraf_token.txt
-  /tokens/admin/admin_token.txt
-
-These named volumes persist independently from container recreation.
-
-### Persistence and Re-Initialization Rules
-
-InfluxDB initialization only occurs once.
-
-First startup (empty /var/lib/influxdb2):
-- Setup is executed
-- Token generation script runs
-- Tokens are generated and saved
-
-Subsequent startups (non-empty /var/lib/influxdb2):
-- No setup is performed
-- No scripts in /docker-entrypoint-initdb.d/ are executed
-- Tokens remain valid
-- Volumes persist
-
-### Recommendations
-
-1. Before the first `docker compose up`, ensure `/var/lib/influxdb2` is empty.
-2. Do not delete the named volumes unless you want to regenerate all tokens (in that case, also wipe the InfluxDB data volume).
-3. Tokens persist even if the container is recreated, as long as the volumes remain intact.

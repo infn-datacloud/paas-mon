@@ -17,6 +17,9 @@ services:
     environment:
       - DOCKER_INFLUXDB_INIT_MODE=setup
       - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE=/generated_admin_token
+      - DOCKER_INFLUXDB_INIT_RETENTION=0
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=admin123
     volumes:
       -  influxdb_data:/var/lib/influxdb2
       -  grafana_tokens:/tokens/grafana:rw
@@ -116,6 +119,8 @@ services:
       - kafka_net
     env_file:
       - .env
+    environment:
+      - TELEGRAF_CONSUMER_GROUP=Telegraf_group
     volumes:
       - ./data/telegraf/telegraf.conf:/etc/telegraf/telegraf.conf:ro
       - telegraf_tokens:/tokens/telegraf:ro
@@ -136,6 +141,8 @@ services:
     env_file: .env
     environment:
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
     volumes:
       - ./data/grafana/provisioning:/etc/grafana/provisioning
       - ./data/grafana/dashboards:/etc/grafana/dashboards
@@ -143,21 +150,21 @@ services:
     restart: unless-stopped
 
 
-  kafka-ui:
-    image: provectuslabs/kafka-ui:latest
-    container_name: kafka-ui
-    depends_on:
-      kafka-broker:
-        condition: service_healthy
-    networks: 
-      - kafka_net
-    ports:
-      - "9999:8080"
-    environment:
-      KAFKA_CLUSTERS_0_NAME: "local"
-      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka-broker:9092"
-      KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
-    restart: unless-stopped
+  #kafka-ui:
+    #image: provectuslabs/kafka-ui:latest
+    #container_name: kafka-ui
+    #depends_on:
+      #kafka-broker:
+        #condition: service_healthy
+    #networks: 
+      #- kafka_net
+    #ports:
+      #- "9999:8080"
+    #environment:
+      #KAFKA_CLUSTERS_0_NAME: "local"
+      #KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: "kafka-broker:9092"
+      #KAFKA_CLUSTERS_0_PROPERTIES_SECURITY_PROTOCOL: PLAINTEXT
+    #restart: unless-stopped
 
 volumes:
   grafana_tokens:

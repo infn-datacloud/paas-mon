@@ -4,7 +4,7 @@ from typing import Callable, Dict, Any, List, Optional
 import json
 
 
-class ProviderSelectorConfig(BaseSettings):
+class MonitoringConfig(BaseSettings):
     """
     Configuration class for the monitoring pipeline.
     Loads Kafka and application parameters from environment variables
@@ -28,6 +28,7 @@ class ProviderSelectorConfig(BaseSettings):
     KAFKA_FETCH_MAX_BYTES: int = Field(default=104857600, env="KAFKA_FETCH_MAX_BYTES")
     KAFKA_MAX_REQUEST_SIZE: int = Field(default=104857600, env="KAFKA_MAX_REQUEST_SIZE")
     KAFKA_MAX_POLL_RECORDS: int = Field(default=1, env="KAFKA_MAX_POLL_RECORDS")
+    KAFKA_GROUP_ID: str = Field(default="", env="KAFKA_GROUP_CONSUMER")
 
     # --- Kafka topics ---
     KAFKA_INPUT_TOPICS: List[str] = Field(default=["test_input_topic"], env="KAFKA_INPUT_TOPICS")
@@ -46,6 +47,10 @@ class ProviderSelectorConfig(BaseSettings):
     KAFKA_VALUE_DESERIALIZER_STR: str = Field(default="json", env="KAFKA_VALUE_DESERIALIZER")
     value_serializer: Callable = None
     value_deserializer: Callable = None
+
+    # --- Message format ---
+    OUTPUT_FORMAT: str = Field(default="influx", env="OUTPUT_FORMAT")
+
 
     # --- Validators to generate (de)serializers automatically ---
     @field_validator("value_serializer", mode="before")
@@ -72,10 +77,18 @@ class ProviderSelectorConfig(BaseSettings):
     @field_validator("KAFKA_INPUT_TOPICS", mode="before")
     def parse_input_topics(cls, v):
         if isinstance(v, str):
-            # divide su virgola o spazio e rimuove spazi vuoti
             return [t.strip() for t in v.replace(";", ",").replace(" ", ",").split(",") if t.strip()]
         return v
+    # --- The function json_to_lines can convert messages only in line protocol or json format
+    @field_validator("OUTPUT_FORMAT")
+    def validate_output_format(cls, v):
+        allowed = {"influx", "json_v2"}
+        if v not in allowed:
+            raise ValueError(f"OUTPUT_FORMAT must be one of {allowed}")
+        return v
 
+    
+    
     # --- Utility methods ---
     def get_values(self) -> Dict[str, Any]:
         """
@@ -102,6 +115,5 @@ class ProviderSelectorConfig(BaseSettings):
 
 
 if __name__ == "__main__":
-    cfg = ProviderSelectorConfig()
+    cfg = MonitoringConfig()
     print(cfg.show_configs())
-
