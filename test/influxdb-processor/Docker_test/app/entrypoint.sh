@@ -6,7 +6,7 @@ set -euo pipefail
 #         and writes to a different Kafka topic.
 # -----------------------------------------------------------------------------
 
-echo "[INFO] Starting converter-processor (feeder-monitoring-converter-processor.py)..."
+echo "[INFO] Starting processor (feeder-monitoring.py)..."
 
 # exec replaces the shell, proper signal handling (e.g., Ctrl+C, docker stop)
-exec python3 /app/scripts/feeder-monitoring-converter.py
+exec python3 /app/processors/feeder-monitoring.py

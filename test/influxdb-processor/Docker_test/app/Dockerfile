@@ -21,7 +21,7 @@ RUN python -m pip install --upgrade pip && \
     pip install --user --no-cache-dir -r /requirements.txt
 
 WORKDIR /app
-COPY ./test/influxdb-processor/Docker_test/app/scripts /app/scripts
+COPY ./test/influxdb-processor/Docker_test/app/processors /app/processors
 
 COPY ./test/influxdb-processor/Docker_test/app/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh 

@@ -90,10 +90,10 @@ A Python-based container responsible for consuming, parsing, and re-publishing f
 It executes:
 
 ```
-./app/scripts/feeder-monitoring-converter.py
+./app/processors/feeder-monitoring.py
 ```
 
-→ Link: [`app/scripts/feeder-monitoring-converter.py`](app/scripts/feeder-monitoring-converter.py)
+→ Link: [`app/processors/feeder-monitoring.py`](app/processors/feeder-monitoring-converter.py)
 
 This component:
 - consumes messages from the Kafka topic listed in `KAFKA_INPUT_TOPICS` (defined in the `.env` file)
@@ -107,7 +107,7 @@ KAFKA_OUTPUT_TOPIC
 
 The parsing logic, message schemas, and LP/JSON serialization are implemented in:
 
-→ [`app/scripts/modules/feedermonitoring`](app/scripts/modules/feedermonitoring)
+→ [`app/processors/modules/feedermonitoring`](app/processors/modules/feedermonitoring)
 
 Kafka client configuration is provided by the `MonitoringConfig` class, whose values are dynamically loaded from the `.env` file.
 
@@ -262,19 +262,24 @@ Useful containers to inspect:
 
 ### **OUTPUT_FORMAT limitations**
 
-The conversion of feeder messages is performed by the function  
-`json_to_lines()` defined in:
+Feeder message conversion is implemented in the method 
+`map_feeder_influxdb()` of the `Mapper` class, which defines the supported 
+output formats and performs the actual transformation into InfluxDB-compatible 
+structures.
 
-[`app/scripts/modules/feedermonitoring/msg_v13_model.py`](app/scripts/modules/feedermonitoring/msg_v13_model.py)
+The `Processor` (see  
+[`app/processors/modules/feedermonitoring/processor.py`](app/processors/modules/feedermonitoring/processor.py))  
+invokes this method and forwards the converted messages to Kafka.
 
-This function supports two output formats:
+The supported output formats are:
 
 - `influx`  
 - `json_v2`
 
 However:
 - **Only `influx` is currently compatible with Telegraf ingestion**,  
-  because Telegraf cannot reliably parse the JSON structure produced by the `json_v2` format.
+  because Telegraf cannot reliably parse the JSON structure produced by the 
+  `json_v2` format.
 
 For this reason, `OUTPUT_FORMAT=influx` is the recommended and default choice.
 
