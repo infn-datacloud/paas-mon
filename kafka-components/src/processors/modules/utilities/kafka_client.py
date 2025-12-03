@@ -75,7 +75,8 @@ class KafkaClient():
                                         string.ascii_lowercase +
                                         string.digits, k=64))
         
-        configs['group_id'] = configs['group_id_base'] + rnd_id 
+        if not configs['group_id']:
+            configs['group_id'] = configs['group_id_base'] + rnd_id 
         # configs['group_instance_id'] = self.client_configs['app_name'] + rnd_id
         
         self.prod_configs = copy.copy(self.PROD_DEFAULT_CONFIG)
